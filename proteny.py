@@ -1,13 +1,9 @@
 
 ###############################################################################
 
-###############################################################################
-
 class synteny:
 
-  import sys;
-  sys.path.append('../basic_analysis');
-  import dutils; 
+  import utils.seq as seq;
 
   ###############################################################################
 
@@ -73,11 +69,11 @@ class synteny:
       j = 0;
       for (s, e, id) in sorted(zip(starts, ends, exonids), key=lambda x: x[2], reverse=False):
         tr_ex       = chrdna[s-1:e];
-        transcript += dutils.seq.revcomp(tr_ex) if (strand == '-') else tr_ex;
+        transcript += seq.revcomp(tr_ex) if (strand == '-') else tr_ex;
         exonsource += [exonsource[-1] + int((e-(s-1))/3)];
       #efor
       
-      aa_seq = dutils.seq.translate(transcript);
+      aa_seq = seq.translate(transcript);
       for (s, e, id) in sorted(zip(starts, ends, exonids), key=lambda x: x[2], reverse=False):
         ex_s = exonsource[id-1];
         ex_e = exonsource[id];
@@ -96,7 +92,7 @@ class synteny:
 
     dna = dict(zip(*genome()));
 
-    cc = dict([(c, 0) for c in dutils.seq.codons]);
+    cc = dict([(c, 0) for c in seq.codons]);
     total = 0;
 
     exons = [];
@@ -109,7 +105,7 @@ class synteny:
       j = 0;
       for (s, e, id) in sorted(zip(starts, ends, exonids), key=lambda x: x[2], reverse=False):
         tr_ex       = chrdna[s-1:e];
-        transcript += dutils.seq.revcomp(tr_ex) if (strand == '-') else tr_ex;
+        transcript += seq.revcomp(tr_ex) if (strand == '-') else tr_ex;
         exonsource += [exonsource[-1] + int((e-(s-1))/3)];
       #efor
       for i in xrange(0, len(transcript), 3):

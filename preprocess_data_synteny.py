@@ -14,33 +14,31 @@ dd = '/home/nfs/thiesgehrmann/groups/w/phd/data';
 
 ###############################################################################
 
-org_names =     [];
-org_genes =     [];
-org_sequences = [];
+org_names  = [];
+org_genes  = [];
+org_genome = [];
 
 ###############################################################################
 
-def preprocess_data_schco2():
-  odir = "%s/1b-schco2" % dd;
-
-  sequences = Read('%s/schco2.assembly.fasta' % (odir));
-  genes     = Read('%s/schco2.genes.gff' % (odir)).Copy()
+def preprocess_data_schco2(odir = '%s/2-schco2/' % dd):
+  genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta').Copy();
+  genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz')).Copy();
+  genome   = genome_a | Stack | genome_b;
+  genes    = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz')).Copy()
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
 
-  Export(genes,     '%s/proteny_genes.tsv' % (odir));
-  Export(sequences, '%s/proteny_sequences.fasta' % (odir));
+  Export(genes,  '%s/proteny_genes.tsv' % (odir));
+  Export(genome, '%s/proteny_sequences.fasta' % (odir));
 #edef
 
 ###############################################################################
 
 def preprocess_data_agabi():
-  odir = "%s/2-agabi" % dd;
-  
-  sequences = Read('%s/agabi.assembly_unmasked.fasta' % (odir));
-  genes     = Read('%s/agabi.genes.gff' % (odir)).Copy()
+  genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz')).Copy();
+  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz')).Copy()
   
   genes = genes[_.feature == 'CDS'];
   genes = genes.To(_.attribute, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
