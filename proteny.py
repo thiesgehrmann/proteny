@@ -1,8 +1,12 @@
 import sys;
 from ibidas import *;
+from scipy.cluster import hierarchy;
+import numpy as np;
+
 
 sys.path.append('./utils');
 import seq as sequtils;
+#import smoothing;
 
 ###############################################################################
 
@@ -15,7 +19,9 @@ class proteny:
   org_genes   = [];
   org_exons   = [];
 
-  blast_hits = {};
+  blast_hits   = {};
+  hit_windows  = {};
+  hit_clusters = {};
 
   ###############################################################################
 
@@ -24,34 +30,39 @@ class proteny:
     self.org_genomes = [];
     self.org_genes   = [];
     self.org_exons   = [];
-    self.blast_hits  = {};
+
+    self.blast_hits   = {};
+    self.hit_windows  = {};
+    self.hit_clusters = {};
   #edef
 
   ###############################################################################
 
-  def add_org(self, name, genes_filename, genome_filename, isrep=False):
-    genome = self.load_genome(genome_filename, isrep=isrep);
-    genes  = self.load_gene_defs(genes_filename, isrep=isrep);
+  def add_org(self, name, genes_data, genome_data, isfile=True):
+    genome = self.load_genome(genome_data, isfile=isfile);
+    genes  = self.load_gene_defs(genes_data, isfile=isfile);
 
     self.org_names.append(name);
     self.org_genomes.append(genome);
     self.org_genes.append(genes);
     self.org_exons.append(self.translate_exons(genome, genes));
+
+    return len(self.org_names)-1;
   #edef
     
 
   ###############################################################################
 
   __gene_slice_names__ = ( 'chrid', 'start', 'end', 'strand', 'geneid', 'transcriptid', 'exonid');
-  def load_gene_defs(self, data, isrep=False):
-    return ((data if isrep else Read(data)) / self.__gene_slice_names__).Detect().Copy();
+  def load_gene_defs(self, data, isfile=True):
+    return ((Read(data) if isfile else data) / self.__gene_slice_names__).Detect().Copy();
   #edef
 
   ###############################################################################
 
   __genome_slice_names__ = ('chrid', 'sequence');
-  def load_genome(self, data, isrep=False):
-    return ((data if isrep else Read(data)) / self.__genome_slice_names__).Detect().Copy();
+  def load_genome(self, data, isfile=True):
+    return ((Read(data) if isfile else data) / self.__genome_slice_names__).Detect().Copy();
   #edef
 
   #############################################################################
@@ -156,11 +167,52 @@ class proteny:
               _.bitscore);
     F = ( F / self.__blast_slice_names__).Copy()
     self.blast_hits[(id_a, id_b)] = F;
+
+    return (id_a, id_b);
   #edef
 
   ###############################################################################
 
-  
+  def windows(self, k, ws=[20000]):
+
+    BR = self.blast_hits[k];
+    F  = smoothing.reindex_blast(BR);
+
+    hits = F.Get(_.i, _.a_assemblyid, _.a_proteinid, _.a_exonid, _.b_assemblyid, _.b_proteinid, _.b_exonid, _.pident, _.evalue, _.bitscore);
+    BR_a = F.Get(_.i, _.a_assemblyid, _.a_start, _.a_end) / ('i', 'assemblyid', 'start', 'end');
+    BR_b = F.Get(_.i, _.b_assemblyid, _.b_start, _.b_end) / ('i', 'assemblyid', 'start', 'end');
+
+    brs  = [ BR_a, BR_b ];
+
+    H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
+    O = [];
+
+    for br in brs:
+      org_ind, H = sort_org(br, H);
+      O.append(org_ind);
+    #efor
+
+    RS = [];
+    hlen = len(H);
+
+    for w in ws:
+      R = [];
+      for h in xrange(hlen):
+        R.append(get_reg_hits(H, O, h, w));
+      #efor
+      RS.append(R);
+    #efor
+
+    scores = [[ score(RS[i][k]) for i in xrange(len(ws)) ] for k in xrange(hlen)]
+
+    self.hit_windows[k] = scores;
+
+    return k;
+  #edef
+
+  ###############################################################################
+
+    
   
 
 ###############################################################################

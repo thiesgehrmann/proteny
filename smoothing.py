@@ -227,39 +227,42 @@ def clust_description(H, O, scores, C):
 ###############################################################################
 ###############################################################################
 
-BR = Load("results.Schco.Agabi.blast");
-F  = reindex_blast(BR);
+def windows(BR, ws=[20000]):
 
-hits = F.Get(_.i, _.a_assemblyid, _.a_proteinid, _.a_exonid, _.b_assemblyid, _.b_proteinid, _.b_exonid, _.pident, _.evalue, _.bitscore);
-BR_a = F.Get(_.i, _.a_assemblyid, _.a_start, _.a_end) / ('i', 'assemblyid', 'start', 'end');
-BR_b = F.Get(_.i, _.b_assemblyid, _.b_start, _.b_end) / ('i', 'assemblyid', 'start', 'end');
+  BR = PR.blast_hits;
+  F  = reindex_blast(BR);
 
-brs  = [ BR_a, BR_b ];
+  hits = F.Get(_.i, _.a_assemblyid, _.a_proteinid, _.a_exonid, _.b_assemblyid, _.b_proteinid, _.b_exonid, _.pident, _.evalue, _.bitscore);
+  BR_a = F.Get(_.i, _.a_assemblyid, _.a_start, _.a_end) / ('i', 'assemblyid', 'start', 'end');
+  BR_b = F.Get(_.i, _.b_assemblyid, _.b_start, _.b_end) / ('i', 'assemblyid', 'start', 'end');
 
-H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
-O = [];
+  brs  = [ BR_a, BR_b ];
 
-for br in brs:
-  org_ind, H = sort_org(br, H);
-  O.append(org_ind);
-#efor
+  H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
+  O = [];
 
-RS = [];
-ws = [ 200, 2000, 20000, 40000, 100000 ];
-hlen = len(H);
-
-for w in ws:
-  R = [];
-  for h in xrange(hlen):
-    print "%d, %d / %d" % (w, h, hlen);
-    R.append(get_reg_hits(H, O, h, w));
+  for br in brs:
+    org_ind, H = sort_org(br, H);
+    O.append(org_ind);
   #efor
-  RS.append(R);
-#efor
 
-scores = [[ score(RS[i][k]) for i in xrange(5) ] for k in xrange(hlen)]
+  RS = [];
+  hlen = len(H);
 
-k = sorted(enumerate(scores), key=lambda x: x[1][2]);
+  for w in ws:
+    R = [];
+    for h in xrange(hlen):
+      print "%d, %d / %d" % (w, h, hlen);
+      R.append(get_reg_hits(H, O, h, w));
+    #efor
+    RS.append(R);
+  #efor
+
+  scores = [[ score(RS[i][k]) for i in xrange(len(ws)) ] for k in xrange(hlen)]
+
+  return scores;
+
+#edef
 
 ###############################################################################
 
