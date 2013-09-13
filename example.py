@@ -20,7 +20,7 @@ PR.save(savename);
 k = PR.windows(k);
 PR.save(savename);
 
-k = PR.cluster_distance(k);
+k = PR.hit_distance(k);
 PR.save(savename);
 
 k = PR.cluster_linkage(k);

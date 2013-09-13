@@ -22,10 +22,11 @@ class proteny:
   org_genes   = [];
   org_exons   = [];
 
-  blast_hits    = {};
-  hit_windows   = {};
-  hit_clusters  = {};
-  hit_distances = {};
+  blast_hits       = {};
+  hit_windows      = {};
+  hit_clusters     = {};
+  hit_distances    = {};
+  cluster_linkages = {};
 
   ###############################################################################
 
@@ -35,10 +36,11 @@ class proteny:
     self.org_genes   = [];
     self.org_exons   = [];
 
-    self.blast_hits    = {};
-    self.hit_windows   = {};
-    self.hit_clusters  = {};
-    self.hit_distances = {};
+    self.blast_hits       = {};
+    self.hit_windows      = {};
+    self.hit_clusters     = {};
+    self.hit_distances    = {};
+    self.cluster_linkages = {};
 
     if not(load == None):
       p = cPickle.load(open(load, 'r'));
