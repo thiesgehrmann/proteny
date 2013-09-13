@@ -1,4 +1,7 @@
 import sys;
+import types;
+import cPickle;
+
 from ibidas import *;
 from scipy.cluster import hierarchy;
 import numpy as np;
@@ -6,37 +9,57 @@ import numpy as np;
 
 sys.path.append('./utils');
 import seq as sequtils;
-#import smoothing;
+import smoothing;
 
 ###############################################################################
 
 class proteny:
 
-  ###############################################################################
+  #############################################################################
 
   org_names   = [];
   org_genomes = [];
   org_genes   = [];
   org_exons   = [];
 
-  blast_hits   = {};
-  hit_windows  = {};
-  hit_clusters = {};
+  blast_hits    = {};
+  hit_windows   = {};
+  hit_clusters  = {};
+  hit_distances = {};
 
   ###############################################################################
 
-  def __init__(self):
+  def __init__(self, load=None):
     self.org_names   = [];
     self.org_genomes = [];
     self.org_genes   = [];
     self.org_exons   = [];
 
-    self.blast_hits   = {};
-    self.hit_windows  = {};
-    self.hit_clusters = {};
+    self.blast_hits    = {};
+    self.hit_windows   = {};
+    self.hit_clusters  = {};
+    self.hit_distances = {};
+
+    if not(load == None):
+      p = cPickle.load(open(load, 'r'));
+      for (attr, value) in p:
+        setattr(self, attr, value);
+      #efor
+    #fi
   #edef
 
   ###############################################################################
+
+  def save(self, file):
+    fd = open(file, 'w');
+    isfunc = lambda obj, attr: hasattr(obj, attr) and type(getattr(obj, attr)) == types.MethodType;
+    p = [ (attr, getattr(self, attr)) for attr in dir(self) if not(isfunc(self, attr)) ];
+
+    cPickle.dump(p, fd, protocol=2);
+    fd.close();
+  #edef
+
+  #############################################################################
 
   def add_org(self, name, genes_data, genome_data, isfile=True):
     genome = self.load_genome(genome_data, isfile=isfile);
@@ -49,11 +72,11 @@ class proteny:
 
     return len(self.org_names)-1;
   #edef
-    
 
   ###############################################################################
 
   __gene_slice_names__ = ( 'chrid', 'start', 'end', 'strand', 'geneid', 'transcriptid', 'exonid');
+
   def load_gene_defs(self, data, isfile=True):
     return ((Read(data) if isfile else data) / self.__gene_slice_names__).Detect().Copy();
   #edef
@@ -61,6 +84,7 @@ class proteny:
   ###############################################################################
 
   __genome_slice_names__ = ('chrid', 'sequence');
+
   def load_genome(self, data, isfile=True):
     return ((Read(data) if isfile else data) / self.__genome_slice_names__).Detect().Copy();
   #edef
@@ -68,6 +92,7 @@ class proteny:
   #############################################################################
 
   __exon_slice_names__ = __gene_slice_names__ + ('sequence',)
+
   def translate_exons(self, genome, genes):
 
     EG = genes.GroupBy(_.transcriptid).Get(_.chrid[0], _.start, _.end, _.strand[0], _.geneid[0], _.transcriptid, _.exonid).Copy();
@@ -137,7 +162,11 @@ class proteny:
 
   ###############################################################################
 
-  __blast_slice_names__ = ('a_chrid', 'a_strand', 'a_geneid', 'a_transcriptid', 'a_exonid', 'b_chrid', 'b_strand', 'b_geneid', 'b_transcriptid', 'b_exonid', 'qstart', 'qend', 'sstart', 'send', 'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
+  __blast_slice_names__ = ('a_chrid', 'a_strand', 'a_geneid', 'a_transcriptid', 'a_exonid', \
+                           'b_chrid', 'b_strand', 'b_geneid', 'b_transcriptid', 'b_exonid', \
+                           'a_start', 'a_end', 'b_start', 'b_end',                          \
+                           'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
+
   def blast(self, id_a = 0, id_b=1):
     if len(self.org_names) < 2:
       print "Cannot run BLAST, too few organisms added!";
@@ -173,14 +202,14 @@ class proteny:
 
   ###############################################################################
 
-  def windows(self, k, ws=[20000]):
+  def windows(self, k, WS=[20000]):
 
     BR = self.blast_hits[k];
     F  = smoothing.reindex_blast(BR);
 
-    hits = F.Get(_.i, _.a_assemblyid, _.a_proteinid, _.a_exonid, _.b_assemblyid, _.b_proteinid, _.b_exonid, _.pident, _.evalue, _.bitscore);
-    BR_a = F.Get(_.i, _.a_assemblyid, _.a_start, _.a_end) / ('i', 'assemblyid', 'start', 'end');
-    BR_b = F.Get(_.i, _.b_assemblyid, _.b_start, _.b_end) / ('i', 'assemblyid', 'start', 'end');
+    hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.pident, _.evalue, _.bitscore);
+    BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
+    BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
 
     brs  = [ BR_a, BR_b ];
 
@@ -188,33 +217,131 @@ class proteny:
     O = [];
 
     for br in brs:
-      org_ind, H = sort_org(br, H);
+      org_ind, H = smoothing.sort_org(br, H);
       O.append(org_ind);
     #efor
 
     RS = [];
     hlen = len(H);
 
-    for w in ws:
+    print "Smoothing hits. This will take a while!";
+    for ws in WS:
       R = [];
       for h in xrange(hlen):
-        R.append(get_reg_hits(H, O, h, w));
+        print "%d/%d" % (h, hlen);
+        R.append(smoothing.get_reg_hits(H, O, h, ws));
       #efor
       RS.append(R);
     #efor
 
-    scores = [[ score(RS[i][k]) for i in xrange(len(ws)) ] for k in xrange(hlen)]
+    scores = [[ smoothing.score(RS[i][j]) for i in xrange(len(WS)) ] for j in xrange(hlen)]
 
-    self.hit_windows[k] = scores;
+    self.hit_windows[k] = (H, O, scores, WS);
 
     return k;
   #edef
 
-  ###############################################################################
+  #############################################################################
 
-    
+  def hit_distance(self, k):
+    H, O, scores, WS = self.hit_windows[k];
+
+    HC = smoothing.chr_pair_group(H);
+    D  = {};
+
+    i = 0;
+    for hc_k in HC.keys():
+      print i, len(HC.keys());
+      hc  = HC[hc_k];
+      if len(hc) < 2:
+        continue;
+      #fi
+      cdm = np.array(smoothing.condenseddm(H, O, hc), dtype=np.dtype('u8'));
+      if len(cdm) > 2:
+        D[hc_k] = cdm;
+      #fi
+      i += 1;
+    #efor
+    self.hit_distances[k] = (HC, D);
+    return k;
+  #edef
+
+  #############################################################################
+
+  def cluster_linkage(self, k, linkage_type='single'):
+    if k not in self.hit_distances:
+      print "You must run hit_distance() first!";
+      return None;
+    #fi
+
+    linkage_types = { 'single'   : hierarchy.single,
+                      'complete' : hierarchy.complete,
+                      'average'  : hierarchy.average,
+                      'weighted' : hierarchy.weighted,
+                      'centroid' : hierarchy.centroid,
+                      'median'   : hierarchy.median,
+                      'ward'     : hierarchy.ward };
+
+    HC, D = self.hit_distances[k];
+    L = {};
+    for dk in D.keys():
+      print dk;
+      L[dk] = linkage_types[linkage_type](D[dk]);
+    #efor
+
+    self.cluster_linkages[k] = (L, linkage_type);
+
+    return k;
+  #edef
+
+  #############################################################################
+
+  def cluster_hits(self, k, CS=[20000], linkage_type='single'):
+    if (k not in self.hit_windows) or (k not in self.cluster_linkages):
+      print "You must run windows() and cluster_linkage() first!";
+      return None;
+    #fi
+
+    H,  O, scores, WS = self.hit_windows[k];
+    HC, D             = self.hit_distances[k];
+    L,  lt            = self.cluster_linkages[k];
+
+    C = [];
+    for cs in CS:
+
+      HC_clust = {};
+      for lk in L.keys():
+        linkage = linkage_types[linkage_type](L[lk]);
+        hc      = HC[lk];
+
+        hclust  = hierarchy.fcluster(linkage, cs, criterion='distance');
+        nclust  = max(hclust);
+        clusts  = [ [] for i in xrange(nclust) ];
+        
+        for (h, c) in zip(hc, hclust):
+          clusts[c-1].append(h);
+        #efor
+        HC_clust[k] = clusts;
+      #efor
+
+      hit_clusts = [];
+      for k in HC_clust.keys():
+        clusts = HC_clust[k];
+        for C in clusts:
+          cd = smoothing.clust_description(H, O, scores, C);
+          hit_clusts.append(cd);
+        #efor
+      #efor
+      C.append(hit_clusts);
+    #efor
+
+    self.hit_clusts[k] = (C, CS);
+    return k;
+  #edef
+
+  #############################################################################
   
 
 ###############################################################################
 
-
+#eclass

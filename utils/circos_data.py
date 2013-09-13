@@ -9,6 +9,26 @@ class circos_data:
     self.write_genes(PR, dir);
     self.write_exons(PR, dir);
     self.write_blast(PR, dir);
+    self.write_clusts(PR, dir);
+  #edef
+
+  #############################################################################
+
+  def write_clusts(self, PR, dir):
+    for (i, j) in PR.hit_clusters.keys():
+      (HC, CS) = PR.hit_clusters[(i,j)];
+      for (l, cs) in enumerate(CS):
+        hc = HC[l];
+        for hit_clusts in hc:
+          fd = open('%s/clusters_%s_%s_%d_avg_sum_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], cs), 'w');
+          for (k, h) in enumerate(hit_clusts):
+            fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\ta_chrid=%d,nhits=%d,score=%f,prots_a=%s\n' % (PR.org_names[i], PR.org_names[j], k, names[i], h[0], h[2], h[3], h[1], h[8], h[9], ';'.join(['%s' % id for id in h[10]])));
+            fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tb_chrid=%d,nhits=%d,score=%f,prots_b=%s\n' % (PR.org_names[i], PR.org_names[j], k, names[j], h[4], h[6], h[7], h[5], h[8], h[9], ';'.join(['%s' % id for id in h[11]])));
+          #efor
+          fd.close();
+        #efor
+      #efor
+    #efor
   #edef
 
   #############################################################################
@@ -23,13 +43,13 @@ class circos_data:
       for (hitid, hit) in enumerate(zip(*F())):
         fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\ta_strand=%s,pident=%f,evalue=%f,bitscore=%f,a_geneid=%s,a_transcriptid=%s,a_exonid=%d\n' \
           % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[i], hit[D['a_chrid']], \
-             hit[D['qstart']], hit[D['qend']], \
+             hit[D['a_start']], hit[D['a_end']], \
              ('p' if (hit[D['a_strand']]) == '+' else 'n'), \
              hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
              str(hit[D['a_geneid']]), str(hit[D['a_transcriptid']]), hit[D['a_exonid']]));
         fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\tb_strand=%s,pident=%f,evalue=%f,bitscore=%f,b_geneid=%s,b_transcriptid=%s,b_exonid=%d\n' \
           % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[j], hit[D['b_chrid']], \
-             hit[D['sstart']], hit[D['send']], \
+             hit[D['b_start']], hit[D['b_end']], \
              ('p' if (hit[D['b_strand']]) == '+' else 'n'), \
              hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
              str(hit[D['b_geneid']]), str(hit[D['b_transcriptid']]), hit[D['b_exonid']]));
