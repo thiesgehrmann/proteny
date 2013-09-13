@@ -22,6 +22,16 @@ org_genome = [];
 
 ###############################################################################
 
+def example(org, chr):
+  (name, genes, genome) = org(odir = None);
+  genes  = genes[_.f0 == chr];
+  genome = genome[_.f0 == chr];
+
+  return (name, genes, genome);
+#edef
+
+###############################################################################
+
 def schco2(odir = '%s/1b-schco2' % dd):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta').Copy();
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz')).Copy();
@@ -32,8 +42,10 @@ def schco2(odir = '%s/1b-schco2' % dd):
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
 
-  Export(genes,  '%s/proteny_genes.tsv' % (odir));
-  Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  #fi
 
   return ("schco2", genes, genome);
 #edef
@@ -47,13 +59,15 @@ def agabi(odir = '%s/2-agabi' % dd):
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
-  
-  Export(genes,  '%s/proteny_genes.tsv' % (odir));
-  Export(genome, '%s/proteny_sequences.fasta' % (odir));
+
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  #fi
 
   return ("agabi", genes, genome);
 #edef
-
 
 ###############################################################################
 

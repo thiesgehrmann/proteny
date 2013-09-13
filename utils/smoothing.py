@@ -1,4 +1,5 @@
 from ibidas import *;
+import numpy as np;
 
 ###############################################################################
 
@@ -206,7 +207,7 @@ def chr_pair_group(H):
 ###############################################################################
 
 def clust_description(H, O, scores, C):
-  hits        = [ H[i] for i in C ];
+  hits        = [ H[i] for i in np.array(C, dtype=np.dtype('u8')) ];
   hits_scores = [ scores[i][-4] for i in C ];
   hits_a      = [ O[0][h[0][0][0]][h[0][0][1]] for h in hits ];
   hits_b      = [ O[1][h[0][1][0]][h[0][1][1]] for h in hits ];

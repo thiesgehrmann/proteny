@@ -296,7 +296,7 @@ class proteny:
 
   #############################################################################
 
-  def cluster_hits(self, k, CS=[20000], linkage_type='single'):
+  def cluster_hits(self, k, CS=[20000]):
     if (k not in self.hit_windows) or (k not in self.cluster_linkages):
       print "You must run windows() and cluster_linkage() first!";
       return None;
@@ -311,7 +311,7 @@ class proteny:
 
       HC_clust = {};
       for lk in L.keys():
-        linkage = linkage_types[linkage_type](L[lk]);
+        linkage = L[lk];
         hc      = HC[lk];
 
         hclust  = hierarchy.fcluster(linkage, cs, criterion='distance');
@@ -342,6 +342,7 @@ class proteny:
   #############################################################################
   
 
+#eclass
+
 ###############################################################################
 
-#eclass
