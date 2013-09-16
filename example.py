@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import sys;
+sys.path.append('utils');
+
 import circos_data;
 import proteny as pp;
 import data;
