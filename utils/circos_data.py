@@ -16,17 +16,15 @@ class circos_data:
 
   def write_clusts(self, PR, dir):
     for (i, j) in PR.hit_clusters.keys():
-      (HC, CS) = PR.hit_clusters[(i,j)];
+      (HD, CS) = PR.hit_clusters[(i,j)];
       for (l, cs) in enumerate(CS):
-        hc = HC[l];
-        for hit_clusts in hc:
-          fd = open('%s/clusters_%s_%s_%d_avg_sum_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], cs), 'w');
-          for (k, h) in enumerate(hit_clusts):
-            fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\ta_chrid=%d,nhits=%d,score=%f,prots_a=%s\n' % (PR.org_names[i], PR.org_names[j], k, names[i], h[0], h[2], h[3], h[1], h[8], h[9], ';'.join(['%s' % id for id in h[10]])));
-            fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tb_chrid=%d,nhits=%d,score=%f,prots_b=%s\n' % (PR.org_names[i], PR.org_names[j], k, names[j], h[4], h[6], h[7], h[5], h[8], h[9], ';'.join(['%s' % id for id in h[11]])));
-          #efor
-          fd.close();
+        hd = HD[l];
+        fd = open('%s/clusters_%s_%s_%d_avg_sum_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], cs), 'w');
+        for (k, h) in enumerate(hd):
+          fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\ta_chrid=%d,nhits=%d,score=%f,prots_a=%s\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], h[0], h[2], h[3], h[1], h[8], h[9], ';'.join(['%s' % id for id in h[10]])));
+          fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tb_chrid=%d,nhits=%d,score=%f,prots_b=%s\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], h[4], h[6], h[7], h[5], h[8], h[9], ';'.join(['%s' % id for id in h[11]])));
         #efor
+        fd.close();
       #efor
     #efor
   #edef

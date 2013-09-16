@@ -6,7 +6,6 @@ from ibidas import *;
 from scipy.cluster import hierarchy;
 import numpy as np;
 
-
 sys.path.append('./utils');
 import seq as sequtils;
 import smoothing;
@@ -24,9 +23,9 @@ class proteny:
 
   blast_hits       = {};
   hit_windows      = {};
-  hit_clusters     = {};
   hit_distances    = {};
   cluster_linkages = {};
+  hit_clusters     = {};
 
   ###############################################################################
 
@@ -38,9 +37,9 @@ class proteny:
 
     self.blast_hits       = {};
     self.hit_windows      = {};
-    self.hit_clusters     = {};
     self.hit_distances    = {};
     self.cluster_linkages = {};
+    self.hit_clusters     = {};
 
     if not(load == None):
       p = cPickle.load(open(load, 'r'));
@@ -308,7 +307,7 @@ class proteny:
     HC, D             = self.hit_distances[k];
     L,  lt            = self.cluster_linkages[k];
 
-    C = [];
+    CD = [];
     for cs in CS:
 
       HC_clust = {};
@@ -323,21 +322,21 @@ class proteny:
         for (h, c) in zip(hc, hclust):
           clusts[c-1].append(h);
         #efor
-        HC_clust[k] = clusts;
+        HC_clust[lk] = clusts;
       #efor
 
       hit_clusts = [];
-      for k in HC_clust.keys():
-        clusts = HC_clust[k];
+      for lk in HC_clust.keys():
+        clusts = HC_clust[lk];
         for C in clusts:
           cd = smoothing.clust_description(H, O, scores, C);
           hit_clusts.append(cd);
         #efor
       #efor
-      C.append(hit_clusts);
+      CD.append(hit_clusts);
     #efor
 
-    self.hit_clusts[k] = (C, CS);
+    self.hit_clusters[k] = (CD, CS);
     return k;
   #edef
 

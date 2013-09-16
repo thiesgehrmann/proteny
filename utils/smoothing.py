@@ -10,9 +10,9 @@ def reindex_blast(br):
   F = br.Get(_.a_chrid, _.a_geneid, _.a_exonid, \
              _.b_chrid, _.b_geneid, _.b_exonid, \
              _.a_start,                         \
-             _.a_start,                         \
+             _.a_end,                           \
              _.b_start,                         \
-             _.b_start,                         \
+             _.b_end,                           \
              _.pident,                          \
              _.evalue,                          \
              _.bitscore);
@@ -208,18 +208,18 @@ def chr_pair_group(H):
 
 def clust_description(H, O, scores, C):
   hits        = [ H[i] for i in np.array(C, dtype=np.dtype('u8')) ];
-  hits_scores = [ scores[i][-4] for i in C ];
+  hits_scores = [ scores[i][0] for i in C ];
   hits_a      = [ O[0][h[0][0][0]][h[0][0][1]] for h in hits ];
   hits_b      = [ O[1][h[0][1][0]][h[0][1][1]] for h in hits ];
   prots_a     = set([ h[2] for h in hits ]);
   prots_b     = set([ h[5] for h in hits ]);
 
   a_chr   = hits[0][1];
-  a_start = min([ h[2] for h in hits_a]);
-  a_end   = max([h[3] for h in hits_a]);
+  a_start = min([ h[2] for h in hits_a ]);
+  a_end   = max([ h[3] for h in hits_a ]);
   b_chr   = hits[0][4];
-  b_start = min([ h[2] for h in hits_b]);
-  b_end   = max([h[3] for h in hits_b]);
+  b_start = min([ h[2] for h in hits_b ]);
+  b_end   = max([ h[3] for h in hits_b ]);
   n_hits  = len(hits);
   score   = sum(hits_scores);
 
