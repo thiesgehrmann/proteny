@@ -3,7 +3,7 @@
 import sys;
 sys.path.append('utils');
 
-import circos_data;
+import circos_data as cdata;
 import proteny as pp;
 import data;
 
@@ -51,7 +51,8 @@ PR.save(savename);
 # VISUALIZE
 
   # Export data into a CIRCOS format
-cdata = circos_data.circos_data();
-cdata.write_data(PR, '%s/data' % circdir);
+files = cdata.write_data(PR, '%s/data' % circdir);
+
+
 
 

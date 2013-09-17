@@ -177,7 +177,7 @@ class proteny:
     b_exons = self.org_exons[id_b][_.end - _.start > 60] / tuple([ 'b_' + s for s in self.__exon_slice_names__]);
     
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
-    R = a_exons | Blast(reciprocal = True, normalize=True, folder='./blast_runs/') | b_exons
+    R = a_exons | Blast(normalize=True, folder='./blast_runs/') | b_exons
     R = R.Copy();
     #filename = 'results.%s.%s.blast' % (self.org_names[id_a], self.org_names[id_b]);
     #self.blast_results.append((id_a, id_b, filename));

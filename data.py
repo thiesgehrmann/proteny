@@ -32,7 +32,7 @@ def example(org, chr):
 
 ###############################################################################
 
-def schco2(odir = '%s/1b-schco2' % dd):
+def agabi(odir = '%s/2-agabi' % dd):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta').Copy();
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz')).Copy();
   genome   = genome_a | Stack | genome_b;
@@ -47,12 +47,12 @@ def schco2(odir = '%s/1b-schco2' % dd):
     Export(genome, '%s/proteny_sequences.fasta' % (odir));
   #fi
 
-  return ("schco2", genes, genome);
+  return ("agabi", genes, genome);
 #edef
 
 ###############################################################################
 
-def agabi(odir = '%s/2-agabi' % dd):
+def schco2(odir = '%s/1b-schco2' % dd):
   genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz')).Copy();
   genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz')).Copy()
   
@@ -66,7 +66,7 @@ def agabi(odir = '%s/2-agabi' % dd):
     Export(genome, '%s/proteny_sequences.fasta' % (odir));
   #fi
 
-  return ("agabi", genes, genome);
+  return ("schco2", genes, genome);
 #edef
 
 ###############################################################################
