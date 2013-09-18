@@ -170,8 +170,8 @@ chromosomes                 = %s
       </rule>
       <rule>
         condition = 1
-        color     = eval(sprintf("hsv(%d,%f,%f)", (var(b_chrid) * 10), ( var(bitscore) ), 1.0 ))
-        #flat      = yes
+        color     = eval(sprintf("hsv(%d,%f,%f)", var(h), var(s), var(v) ))
+        #flat     = yes
       </rule>
     </rules>
 """

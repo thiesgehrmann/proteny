@@ -1,8 +1,7 @@
 import os;
 
-class circos_chrom:
-  region      = None;
-  ud_dist     = 0;
+class circos_chr:
+  chrs        = [];
   outdir      = "./";
   name        = "";
   karyotypes  = [];
@@ -14,9 +13,9 @@ class circos_chrom:
   chromosomes_units = 1;
   max_links_number  = 712173;
 
-  def __init__(self, files, region, ud_dist, outdir, name):
-    self.region      = region;
-    self.ud_dist     = ud_dist;
+  def __init__(self, files, chrs, chr_scale, outdir, name):
+    self.chrs        = chrs;
+    self.chr_scale   = chr_scale;
     self.karyotypes  = files['karyotype'];
     self.clust_links = files['clusts'];
     self.text_prots  = files['genes']['text'];
@@ -47,7 +46,7 @@ karyotype = %s
 chromosomes_units           = %d
 chromosomes_display_default = no
 chromosomes                 = %s
-
+%s
 <<include etc/chr_ideogram.conf>>
 <<include etc/chr_links.conf>>
 <<include etc/chr_plots.conf>>
@@ -139,8 +138,8 @@ chromosomes                 = %s
       </rule>
       <rule>
         condition = 1
-        color     = eval(sprintf("hsv(%d,%f,%f)", (var(b_chrid) * 10), ( (10,var(score))[var(score) < 10] / 10.0  ), 1.0 ))
-        #flat      = yes
+        color     = eval(sprintf("hsv(%d,%f,%f)", var(h), ( (10,var(score))[var(score) < 10] / 10.0  ), 1.0 ))
+        #flat     = yes
       </rule>
     </rules>
 """
@@ -156,22 +155,10 @@ chromosomes                 = %s
 
   #############################################################################
 
-  def make_region(self):
-    # ('bri1',   [ ('schco2', 255701,  'scaffold_1',  5346259, 5348750, '-'), ('agabi', 189729, 'scaffold_1',  1865954, 1869064, '+') ] )
-    R = [];
-    for r in self.region[1]:
-      R.append("%s_%s:%d-%d" % (r[0], str(r[2]), r[3]-self.ud_dist, r[4]+self.ud_dist));
-    #efor
-
-    return ';'.join(R);
-  #edef
-
-  #############################################################################
-
   def make_conf(self, outdir):
     filename = '%s/%s.conf' % (self.outdir, self.name);
     fd = open(filename, 'w');
-    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, self.make_region()));
+    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, ';'.join(self.chrs), 'chromosomes_scale = ' + ','.join(self.chr_scale)));
     fd.close();
   #edef
 
@@ -191,7 +178,7 @@ chromosomes                 = %s
     fd = open(filename, 'w');
     fd.write('<links>\n');
     fd.write('max_number = %d\n' % self.max_links_number);
-    for bl in self.blast_links:
+    for bl in self.clust_links:
       fd.write('  <link>\n');
       fd.write('    file          = %s\n' % bl);
       fd.write(self.TXT_links_conf);
