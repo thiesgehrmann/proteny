@@ -16,12 +16,6 @@ from ibidas import *
 
 ###############################################################################
 
-org_names  = [];
-org_genes  = [];
-org_genome = [];
-
-###############################################################################
-
 def example(org, chr):
   (name, genes, genome) = org(odir = None);
   genes  = genes[_.f0 == chr];
@@ -104,6 +98,43 @@ def mouse():
   Export(genome, '%s/proteny_sequences.tsv' % (odir));
 
   return ("mouse", genes, genome);
+#edef
+
+###############################################################################
+
+def aniger_n402():
+  genome = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta', sep=[]);
+  genes  = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff');
+
+  #<chrid>\t<start>\t<end>\t<strand>\t<geneid>\t<transcriptid>\t<exonnumber>
+  genes = genes[_.f2 == 'exon'];
+  genes = genes.To(_.f8, Do=_.Each(lambda x: x.split(';')));
+  genes = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[1].split('=')[1].split('_')[0]), _.f8.Each(lambda x: int(x[0].split('=')[1].split('_')[1][4:])+1 ));
+  genes = genes / ("f0", "f1", "f2", "f3", "f4", "f5");
+  genes = genes.Get(_.f0, _.f1, _.f2, _.f3, _.f4, _.f4, _.f5);
+
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
+
+  return ("aniger_n402", genes.Detect().Copy(), genome.Detect().Copy());
+#edef
+
+###############################################################################
+
+def aniger_513_88():
+  genome = Read(Fetch('http://www.aspergillusgenome.org/download/sequence/A_niger_CBS_513_88/current/A_niger_CBS_513_88_current_chromosomes.fasta.gz'));
+  genes  = Read(Fetch('http://www.aspergillusgenome.org/download/gff/A_niger_CBS_513_88/A_niger_CBS_513_88_current_features.gff'));
+
+  genes = genes[_.f2 == 'exon'];
+  genes = genes.To(_.f8, Do=_.Each(lambda x: x.split(';')));
+  genes = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[1].split('=')[1].split('-')[0]), _.f8.Each(lambda x: x[0].split('-')[2][1:]))
+  genes = genes / ("f0", "f1", "f2", "f3", "f4", "f5");
+  genes = genes.Get(_.f0, _.f1, _.f2, _.f3, _.f4, _.f4, _.f5);
+
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
+
+  return ("aniger_513_88", genes.Detect().Copy(), genome.Detect().Copy());
 #edef
 
 ###############################################################################

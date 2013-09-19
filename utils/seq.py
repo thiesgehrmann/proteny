@@ -24,7 +24,7 @@ def translate(seq):
 def revcomp(seq):
   dict = { 'A' : 'T', 'T' : 'A', 'a' : 't', 't' : 'a',
            'C' : 'G', 'G' : 'C', 'c' : 'g', 'g' : 'c',
-           'R' : 'Y', 'R' : 'Y', 'r' : 'y', 'y' : 'r',
+           'R' : 'Y', 'Y' : 'R', 'r' : 'y', 'y' : 'r',
            'K' : 'M', 'M' : 'K', 'k' : 'm', 'm' : 'k',
            'S' : 'W', 'W' : 'S', 's' : 'w', 'w' : 's',
            'B' : 'V', 'V' : 'B', 'b' : 'v', 'v' : 'b',

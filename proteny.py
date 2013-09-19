@@ -174,7 +174,9 @@ class proteny:
     #fi
 
     a_exons = self.org_exons[id_a][_.end - _.start > 60] / tuple([ 'a_' + s for s in self.__exon_slice_names__]);
+    a_exons = a_exons.To(_.a_sequence, Do=_.ReplaceMissing());
     b_exons = self.org_exons[id_b][_.end - _.start > 60] / tuple([ 'b_' + s for s in self.__exon_slice_names__]);
+    b_exons = b_exons.To(_.b_sequence, Do=_.ReplaceMissing());
     
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
     R = a_exons | Blast(normalize=True, folder='./blast_runs/') | b_exons
