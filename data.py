@@ -60,7 +60,6 @@ def schco2(odir = '%s/1b-schco2' % dd):
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
 
-
   if not(odir == None):
     Export(genes,  '%s/proteny_genes.tsv' % (odir));
     Export(genome, '%s/proteny_sequences.fasta' % (odir));

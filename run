@@ -1,0 +1,10 @@
+#!/bin/sh
+CIRCOS='/home/thiesgehrmann/src/circos-0.64/bin/circos'
+
+for conf in $(ls './' | grep '[.]conf$'); do
+  echo $conf;
+  $CIRCOS -conf $conf -debug_group summary,timer > run.out;
+  cp circos.png ${conf}.png;
+  cp circos.svg ${conf}.svg;
+done
+
