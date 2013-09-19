@@ -18,9 +18,9 @@ circdir  = 'circos';
 ###############################################################################
 # DATA
 
-  # Download data for Schizophyllum commune
+  # Download data for Aniger n402
 an1 = data.aniger_n402();
-  # Download data for Agaricus bisporus
+  # Download data Aniger 513_88
 an2 = data.aniger_513_88();
 
   # Prepare the protenty analysis
