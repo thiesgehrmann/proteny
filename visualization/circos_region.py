@@ -48,10 +48,17 @@ chromosomes_units           = %d
 chromosomes_display_default = no
 chromosomes                 = %s
 
-<<include etc/region_ideogram.conf>>
-<<include etc/region_ticks.conf>>
-<<include etc/region_links.conf>>
-<<include etc/region_plots.conf>>
+#<<include etc/region_ideogram.conf>>
+%s
+
+#<<include etc/region_ticks.conf>>
+%s
+
+#<<include etc/region_links.conf>>
+%s
+
+#<<include etc/region_plots.conf>>
+%s
 
 ################################################################
 # The remaining content is standard and required. It is imported 
@@ -208,10 +215,11 @@ show_tick_labels    = yes
 
   def make_circos(self, outdir):
     self.make_conf(outdir);
-    self.make_ideogram(outdir);
-    self.make_links(outdir);
-    self.make_plots(outdir);
-    self.make_ticks(outdir);
+    i_d = self.make_ideogram(outdir);
+    l_d = self.make_links(outdir);
+    p_d = self.make_plots(outdir);
+    t_d = self.make_ticks(outdir);
+    self.make_conf(outdir, i_d, l_d, p_d, t_d);
   #edef
 
   #############################################################################
@@ -228,7 +236,7 @@ show_tick_labels    = yes
 
   #############################################################################
 
-  def make_conf(self, outdir):
+  def make_conf(self, outdir, i_d, l_d, p_d, t_d):
     filename = '%s/%s.conf' % (self.outdir, self.name);
     fd = open(filename, 'w');
     fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, self.make_region()));
@@ -238,59 +246,54 @@ show_tick_labels    = yes
   #############################################################################
 
   def make_ideogram(self, outdir):
-    filename = '%s/etc/region_ideogram.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write(self.TXT_ideogram_conf);
-    fd.close();
+    return self.TXT_ideogram_conf;
   #edef
 
   #############################################################################
 
   def make_links(self, outdir):
-    filename = '%s/etc/region_links.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write('<links>\n');
-    fd.write('max_number = %d\n' % self.max_links_number);
+    data = "";
+
+    data += '<links>\n';
+    data += 'max_number = %d\n' % self.max_links_number;
     for bl in self.blast_links:
-      fd.write('  <link>\n');
-      fd.write('    file          = %s\n' % bl);
-      fd.write(self.TXT_links_conf);
-      fd.write('  </link>\n');
+      data += '  <link>\n';
+      data += '    file          = %s\n' % bl;
+      data += self.TXT_links_conf;
+      data += '  </link>\n';
     #efor
-    fd.write('</links>\n');
-    fd.close();
+    data += '</links>\n';
+
+    return data;
   #edef
 
   #############################################################################
 
   def make_plots(self, outdir):
-    filename = '%s/etc/region_plots.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write('<plots>\n');
+    data = "";
+    data += '<plots>\n';
 
     for gene in self.gene_tiles:
-      fd.write(self.TXT_gene_plot % gene);
+      data += self.TXT_gene_plot % gene;
     #efor
 
     for exon in self.exon_tiles:
-      fd.write(self.TXT_exon_plot % exon);
+      data += self.TXT_exon_plot % exon;
     #efor
 
     for text in self.text_prots:
-      fd.write(self.TXT_text_plot % text);
+      data += self.TXT_text_plot % text;
     #efor
 
-    fd.write('</plots>\n');
-    fd.close();
+    data += '</plots>\n';
+
+    return data;
   #edef
 
   #############################################################################
 
   def make_ticks(self, outdir):
-    filename = '%s/etc/region_ticks.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write(self.TXT_ticks_conf);
-    fd.close();
+    return  self.TXT_ticks_conf;
   #edef
 
   #############################################################################

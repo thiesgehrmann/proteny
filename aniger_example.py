@@ -12,7 +12,7 @@ import data;
 
 ###############################################################################
 
-savename = 'PR.proteny';
+savename = 'PR_aniger.proteny';
 circdir  = 'circos';
 
 ###############################################################################
@@ -57,8 +57,8 @@ PR.save(savename);
 files = cdata.write_data(PR, '%s/data' % circdir);
 
   # Visualize relationships between chromosomes
-anchrs = [ "ACJE010000%02d" % (i+1)  for i in xrange(an1[2].Shape()()) ];
-for i in xrange(an2[2].Shape()()):
- cc.circos_chr(files, agabichrs + ["An%02d" % (i+1)], ["An%02d=0.4r" % (i+1)], circdir, "An%02d_view" % (i+1) );
+anchrs = [ "aniger_513_88_An%02d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
+for i in xrange(an1[2].Shape()()):
+ cc.circos_chr(files, anchrs + ["aniger_n402_ACJE010000%02d" % (i+1)], ["aniger_n402_ACJE010000%02d=0.4r" % (i+1)], circdir, "An%02d_view" % (i+1) );
 #efor
 

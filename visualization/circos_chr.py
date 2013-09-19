@@ -47,9 +47,15 @@ chromosomes_units           = %d
 chromosomes_display_default = no
 chromosomes                 = %s
 %s
-<<include etc/chr_ideogram.conf>>
-<<include etc/chr_links.conf>>
-<<include etc/chr_plots.conf>>
+
+#<<include etc/chr_ideogram.conf>>
+%s
+
+#<<include etc/chr_links.conf>>
+%s
+
+#<<include etc/chr_plots.conf>>
+%s
 
 ################################################################
 # The remaining content is standard and required. It is imported 
@@ -147,60 +153,57 @@ chromosomes                 = %s
   #############################################################################
 
   def make_circos(self, outdir):
-    self.make_conf(outdir);
-    self.make_ideogram(outdir);
-    self.make_links(outdir);
-    self.make_plots(outdir);
+    i_d = self.make_ideogram(outdir);
+    l_d  = self.make_links(outdir);
+    p_d  = self.make_plots(outdir);
+
+    self.make_conf(outdir, i_d, l_d, p_d);
   #edef
 
   #############################################################################
 
-  def make_conf(self, outdir):
+  def make_conf(self, outdir, i_d, l_d, p_d):
     filename = '%s/%s.conf' % (self.outdir, self.name);
     fd = open(filename, 'w');
-    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, ';'.join(self.chrs), 'chromosomes_scale = ' + ','.join(self.chr_scale)));
+    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, ';'.join(self.chrs), 'chromosomes_scale = ' + ','.join(self.chr_scale), i_d, l_d, p_d));
     fd.close();
   #edef
 
   #############################################################################
 
   def make_ideogram(self, outdir):
-    filename = '%s/etc/chr_ideogram.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write(self.TXT_ideogram_conf);
-    fd.close();
+    return self.TXT_ideogram_conf;
   #edef
 
   #############################################################################
 
   def make_links(self, outdir):
-    filename = '%s/etc/chr_links.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write('<links>\n');
-    fd.write('max_number = %d\n' % self.max_links_number);
+    data = "";
+
+    data +='<links>\n';
     for bl in self.clust_links:
-      fd.write('  <link>\n');
-      fd.write('    file          = %s\n' % bl);
-      fd.write(self.TXT_links_conf);
-      fd.write('  </link>\n');
+      data += '  <link>\n';
+      data += '    file          = %s\n' % bl;
+      data += self.TXT_links_conf;
+      data += '  </link>\n';
     #efor
-    fd.write('</links>\n');
-    fd.close();
+    data += '</links>\n';
+
+    return data;
   #edef
 
   #############################################################################
 
   def make_plots(self, outdir):
-    filename = '%s/etc/chr_plots.conf' % outdir;
-    fd = open(filename, 'w');
-    fd.write('<plots>\n');
+    data = "";
 
+    data += '<plots>\n';
     for gene in self.gene_tiles:
-      fd.write(self.TXT_gene_plot % gene);
+      data += self.TXT_gene_plot % gene;
     #efor
+    data += '</plots>\n';
 
-    fd.write('</plots>\n');
-    fd.close();
+    return data;
   #edef
 
   #############################################################################
