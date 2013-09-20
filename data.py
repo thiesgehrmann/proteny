@@ -16,25 +16,28 @@ from ibidas import *
 
 ###############################################################################
 
-def example(org, chr):
-  (name, genes, genome) = org(odir = None);
+def example(org, chr, odir=None):
+  (name, genes, genome) = org(odir = odir);
   genes  = genes[_.f0 == chr];
   genome = genome[_.f0 == chr];
 
-  return (name, genes, genome);
+  return (name, genes.Copy(), genome.Copy());
 #edef
 
 ###############################################################################
 
 def agabi(odir = '%s/2-agabi' % dd):
-  genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta').Copy();
-  genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz')).Copy();
+  genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta');
+  genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz'));
   genome   = genome_a | Stack | genome_b;
-  genes    = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz')).Copy()
+  genes    = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz'));
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.Copy();
+  genome = genome.Copy();
 
   if not(odir == None):
     Export(genes,  '%s/proteny_genes.tsv' % (odir));
@@ -47,12 +50,15 @@ def agabi(odir = '%s/2-agabi' % dd):
 ###############################################################################
 
 def schco2(odir = '%s/1b-schco2' % dd):
-  genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz')).Copy();
-  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz')).Copy()
+  genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz'));
+  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz'));
   
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.Copy();
+  genome = genome.Copy();
 
   if not(odir == None):
     Export(genes,  '%s/proteny_genes.tsv' % (odir));
@@ -64,45 +70,52 @@ def schco2(odir = '%s/1b-schco2' % dd):
 
 ###############################################################################
 
-def human():
-  odir = "%s/human" % dd;
+def human(odir = "%s/human" % dd):
 
-  genome = Read('%s/Homo_sapiens.GRCh37.73.dna.fa' % (odir), sep=[' ']).Copy();
-  genes  = Read('%s/Homo_sapiens.GRCh37.73.gtf' % (odir)).Copy();
+  genome = Read('%s/human/Homo_sapiens.GRCh37.73.dna.fa' % (dd), sep=[' ']);
+  genes  = Read('%s/human/Homo_sapiens.GRCh37.73.gtf'    % (dd));
 
-  genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().replace('"', '').split(' ')[1] for y in x.split(';')[:-1]]));
-  genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1]),_.f8.Each(lambda x: x[2]));
+  genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().replace('"', '').split(' ')[1] for y in x.split(';')[:-1]]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1]),_.f8.Each(lambda x: x[2]));
 
-  genome.Get(_.f0, _.seq);
+  genome = genome.Get(_.f0, _.seq);
 
-  Export(genes,  '%s/proteny_genes.tsv' % (odir));
-  Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  genes  = genes.Copy();
+  genome = genome.Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  #fi
 
   return ("human", genes, genome);
 #edef
 
 ###############################################################################
 
-def mouse():
-  odir = "%s/mus_musculus" % dd;
+def mouse(odir = "%s/mus_musculus" % dd):
+  genome = Read('%s/mouse/Mus_musculus.GRCm38.73.dna.fa' % (dd), sep=[' ']);
+  genes  = Read('%s/mouse/Mus_musculus.GRCm38.73.gtf'    % (dd));
 
-  genome = Read('%s/Mus_musculus.GRCm38.73.dna.fa' % (odir), sep=[' ']).Copy();
-  genes  = Read('%s/Mus_musculus.GRCm38.73.gtf' % (odir)).Copy();
+  genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().replace('"', '').split(' ')[1] for y in x.split(';')[:-1]]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1]),_.f8.Each(lambda x: x[2]));
 
-  genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().replace('"', '').split(' ')[1] for y in x.split(';')[:-1]]));
-  genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1]),_.f8.Each(lambda x: x[2]));
+  genome = genome.Get(_.f0, _.seq);
 
-  genome.Get(_.f0, _.seq);
+  genes  = genes.Copy();
+  genome = genome.Copy();
 
-  Export(genes,  '%s/proteny_genes.tsv' % (odir));
-  Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  #fi
 
   return ("mouse", genes, genome);
 #edef
 
 ###############################################################################
 
-def aniger_n402():
+def aniger_n402(odir = None):
   genome = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta', sep=[]);
   genes  = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff');
 
@@ -116,12 +129,20 @@ def aniger_n402():
 
   genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
 
-  return ("aniger_n402", genes.Detect().Copy(), genome.Detect().Copy());
+  genes  = genes.Detect().Copy();
+  genome = genome.Detect().Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  #fi
+
+  return ("aniger_n402", genes, genome);
 #edef
 
 ###############################################################################
 
-def aniger_513_88():
+def aniger_513_88(odir = None):
   genome = Read(Fetch('http://www.aspergillusgenome.org/download/sequence/A_niger_CBS_513_88/current/A_niger_CBS_513_88_current_chromosomes.fasta.gz'));
   genes  = Read(Fetch('http://www.aspergillusgenome.org/download/gff/A_niger_CBS_513_88/A_niger_CBS_513_88_current_features.gff'));
 
@@ -134,7 +155,15 @@ def aniger_513_88():
 
   genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
 
-  return ("aniger_513_88", genes.Detect().Copy(), genome.Detect().Copy());
+  genes  = genes.Detect().Copy();
+  genome = genome.Detect().Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.tsv' % (odir));
+  #fi
+
+  return ("aniger_513_88", genes, genome);
 #edef
 
 ###############################################################################
