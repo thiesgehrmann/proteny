@@ -94,8 +94,8 @@ def human(odir = "%s/human" % dd):
 ###############################################################################
 
 def mouse(odir = "%s/mus_musculus" % dd):
-  genome = Read('%s/mouse/Mus_musculus.GRCm38.73.dna.fa' % (dd), sep=[' ']);
-  genes  = Read('%s/mouse/Mus_musculus.GRCm38.73.gtf'    % (dd));
+  genome = Read('%s/mus_musculus/Mus_musculus.GRCm38.73.dna.fa' % (dd), sep=[' ']);
+  genes  = Read('%s/mus_musculus/Mus_musculus.GRCm38.73.gtf'    % (dd));
 
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().replace('"', '').split(' ')[1] for y in x.split(';')[:-1]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1]),_.f8.Each(lambda x: x[2]));

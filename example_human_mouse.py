@@ -12,16 +12,18 @@ import data;
 
 ###############################################################################
 
-savename = 'PR_aniger.proteny';
+savename = 'PR_human12_mouse6.proteny';
 circdir  = 'circos';
 
 ###############################################################################
 # DATA
 
   # Download data for Aniger n402
-human = data.human();
+#human = data.human();
+human = data.example(data.human, '12')
   # Download data Aniger 513_88
-mouse = data.mouse();
+#mouse = data.mouse();
+mouse = data.example(data.mouse, '6')
 
   # Prepare the protenty analysis
 PR = pp.proteny();
