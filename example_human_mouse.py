@@ -19,9 +19,9 @@ circdir  = 'circos';
 # DATA
 
   # Download data for Aniger n402
-an1 = data.aniger_n402();
+human = data.human();
   # Download data Aniger 513_88
-an2 = data.aniger_513_88();
+mouse = data.mouse();
 
   # Prepare the protenty analysis
 PR = pp.proteny();
@@ -57,8 +57,8 @@ PR.save(savename);
 files = cdata.write_data(PR, '%s/data' % circdir);
 
   # Visualize relationships between chromosomes
-anchrs = [ "aniger_513_88_An%02d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
+anchrs = [ "human_%d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
 for i in xrange(an1[2].Shape()()):
- cc.circos_chr(files, anchrs + ["aniger_n402_ACJE010000%02d" % (i+1)], ["aniger_n402_ACJE010000%02d=0.4r" % (i+1)], circdir, "An%02d_view" % (i+1) );
+ cc.circos_chr(files, anchrs + ["mouse_%d" % (i+1)], ["mouse%d=0.4r" % (i+1)], circdir, "mouse_%d_view" % (i+1) );
 #efor
 
