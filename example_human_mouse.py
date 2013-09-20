@@ -57,8 +57,8 @@ PR.save(savename);
 files = cdata.write_data(PR, '%s/data' % circdir);
 
   # Visualize relationships between chromosomes
-anchrs = [ "human_%d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
-for i in xrange(an1[2].Shape()()):
+anchrs = [ "human_%d" % (i+1)  for i in xrange(human[2].Shape()()) ];
+for i in xrange(mouse[2].Shape()()):
  cc.circos_chr(files, anchrs + ["mouse_%d" % (i+1)], ["mouse%d=0.4r" % (i+1)], circdir, "mouse_%d_view" % (i+1) );
 #efor
 
