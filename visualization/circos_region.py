@@ -225,10 +225,10 @@ show_tick_labels    = yes
   #############################################################################
 
   def make_region(self):
-    # ('bri1',   [ ('schco2', 255701,  'scaffold_1',  5346259, 5348750, '-'), ('agabi', 189729, 'scaffold_1',  1865954, 1869064, '+') ] )
+    # ('bri1',   [ ('schco2', 'scaffold_1', 5346259, 5348750), ('agabi', 'scaffold_1', 1865954, 1869064) ] )
     R = [];
     for r in self.region[1]:
-      R.append("%s_%s:%d-%d" % (r[0], str(r[2]), r[3]-self.ud_dist, r[4]+self.ud_dist));
+      R.append("%s_%s:%d-%d" % (r[0], str(r[1]), r[2]-self.ud_dist, r[3]+self.ud_dist));
     #efor
 
     return ';'.join(R);

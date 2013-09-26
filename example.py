@@ -55,16 +55,16 @@ PR.save(savename);
 
       # name     [ (org_name, ID,       chrid,        start,   end,     strand) ... ]
 regions = \
-     [('bri1',   [ ('schco2', 255701,  'scaffold_1',  5346259, 5348750, '-'), ('agabi', 189729, 'scaffold_1',  1865954, 1869064, '+') ] ),
-      ('c2h2',   [ ('schco2', 114363,  'scaffold_16', 363313,  364601,  '-'), ('agabi', 230069, 'scaffold_18', 156741,  158622,  '-') ] ),
-      ('fst3',   [ ('schco2', 257422,  'scaffold_6',  1486211, 1492035, '+'), ('agabi', 154135, 'scaffold_13', 776501,  779982,  '+') ] ),
-      ('fst4',   [ ('schco2', 66861,   'scaffold_4',  2515305, 2519027, '-'), ('agabi', 223670, 'scaffold_7',  344969,  349128,  '+') ] ),
-      ('gat1',   [ ('schco2', 255004,  'scaffold_1',  1406704, 1408481, '+'), ('agabi', 195724, 'scaffold_14', 113077,  114790,  '-') ] ),
-      ('hom1',   [ ('schco2', 257652,  'scaffold_7',  1749469, 1751039, '-'), ('agabi', 192433, 'scaffold_5',  549916,  551732,  '+') ] ),
-      ('hom2',   [ ('schco2', 1034289, 'scaffold_8',  1147947, 1150388, '-'), ('agabi', 192725, 'scaffold_5',  1523421, 1524802, '-') ] ),
-      ('wc1',    [ ('schco2', 78657,   'scaffold_9',  1046213, 1049419, '+'), ('agabi', 207720, 'scaffold_8',  25945,   28694,   '-') ] ),
-      ('wc2',    [ ('schco2', 13988,   'scaffold_2',  844864,  846181,  '-'), ('agabi', 190401, 'scaffold_2',  875026,  876315,  '+') ] ),
-      ('random', [ ('schco2', 1126499, 'scaffold_5',  2483079, 2483664, '-'), ('agabi', 40404,  'scaffold_8',  177699,  179015,  '-') ] ) ];
+     [('bri1',   [ ('schco2', 'scaffold_1',  5346259, 5348750), ('agabi', 'scaffold_1',  1865954, 1869064) ] ),
+      ('c2h2',   [ ('schco2', 'scaffold_16', 363313,  364601 ), ('agabi', 'scaffold_18', 156741,  158622 ) ] ),
+      ('fst3',   [ ('schco2', 'scaffold_6',  1486211, 1492035), ('agabi', 'scaffold_13', 776501,  779982 ) ] ),
+      ('fst4',   [ ('schco2', 'scaffold_4',  2515305, 2519027), ('agabi', 'scaffold_7',  344969,  349128 ) ] ),
+      ('gat1',   [ ('schco2', 'scaffold_1',  1406704, 1408481), ('agabi', 'scaffold_14', 113077,  114790 ) ] ),
+      ('hom1',   [ ('schco2', 'scaffold_7',  1749469, 1751039), ('agabi', 'scaffold_5',  549916,  551732 ) ] ),
+      ('hom2',   [ ('schco2', 'scaffold_8',  1147947, 1150388), ('agabi', 'scaffold_5',  1523421, 1524802) ] ),
+      ('wc1',    [ ('schco2', 'scaffold_9',  1046213, 1049419), ('agabi', 'scaffold_8',  25945,   28694  ) ] ),
+      ('wc2',    [ ('schco2', 'scaffold_2',  844864,  846181 ), ('agabi', 'scaffold_2',  875026,  876315 ) ] ),
+      ('random', [ ('schco2', 'scaffold_5',  2483079, 2483664), ('agabi', 'scaffold_8',  177699,  179015 ) ] ) ];
 
   # Export data into a CIRCOS format
 files = cdata.write_data(PR, '%s/data' % circdir);

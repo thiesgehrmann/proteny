@@ -29,8 +29,8 @@ mouse = data.example(data.mouse, '6')
 PR = pp.proteny();
 
   # Add our organisms.
-id_a = PR.add_org(*an1, isfile=False);
-id_b = PR.add_org(*an2, isfile=False);
+id_a = PR.add_org(*human, isfile=False);
+id_b = PR.add_org(*mouse, isfile=False);
 
 ###############################################################################
 # ANALYSIS

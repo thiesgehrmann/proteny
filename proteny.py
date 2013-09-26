@@ -51,6 +51,18 @@ class proteny:
 
   ###############################################################################
 
+  def key(self, k):
+    key_elems = [ 'id_a' , 'id_b', 'WS', 'linkage_type', 'CS' ];
+    nk        = dict([ (f, None) for f in key_elems]);
+
+    for (i,v) in enumerate(k):
+      nk[key_elems[i]] = v;
+    #efor
+    return nk;
+  #edef
+
+  ###############################################################################
+
   def save(self, file):
     fd = open(file, 'w');
     isfunc = lambda obj, attr: hasattr(obj, attr) and type(getattr(obj, attr)) == types.MethodType;
@@ -200,14 +212,15 @@ class proteny:
     F = ( F / self.__blast_slice_names__).Copy()
     self.blast_hits[(id_a, id_b)] = F;
 
-    return (id_a, id_b);
+    return self.key((id_a, id_b));
   #edef
 
   ###############################################################################
 
-  def windows(self, k, WS=[20000]):
+  def windows(self, k, WS=20000):
 
-    BR = self.blast_hits[k];
+    k['WS'] = WS;
+    BR = self.blast_hits[(k['id_a'], k['id_b'])];
     F  = smoothing.reindex_blast(BR);
 
     hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.pident, _.evalue, _.bitscore);
@@ -224,22 +237,18 @@ class proteny:
       O.append(org_ind);
     #efor
 
-    RS = [];
     hlen = len(H);
 
     print "Smoothing hits. This will take a while!";
-    for ws in WS:
-      R = [];
-      for h in xrange(hlen):
-        print "%d/%d" % (h, hlen);
-        R.append(smoothing.get_reg_hits(H, O, h, ws));
-      #efor
-      RS.append(R);
+    RS = [];
+    for h in xrange(hlen):
+      print "%d/%d" % (h, hlen);
+      RS.append(smoothing.get_reg_hits(H, O, h, WS));
     #efor
 
-    scores = [[ smoothing.score(RS[i][j]) for i in xrange(len(WS)) ] for j in xrange(hlen)]
+    scores = [ smoothing.score(RS[j]) for j in xrange(hlen)]
 
-    self.hit_windows[k] = (H, O, scores, WS);
+    self.hit_windows[(k['id_a'], k['id_b'], k['WS'])] = (H, O, scores);
 
     return k;
   #edef
@@ -247,7 +256,13 @@ class proteny:
   #############################################################################
 
   def hit_distance(self, k):
-    H, O, scores, WS = self.hit_windows[k];
+
+    if (k['id_a'], k['id_b'], k['WS']) not in self.hit_windows:
+      print "You must run windows() first!";
+      return None;
+    #fi
+
+    H, O, scores = self.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
 
     HC = smoothing.chr_pair_group(H);
     D  = {};
@@ -265,14 +280,17 @@ class proteny:
       #fi
       i += 1;
     #efor
-    self.hit_distances[k] = (HC, D);
+    self.hit_distances[(k['id_a'], k['id_b'])] = (HC, D);
+
     return k;
   #edef
 
   #############################################################################
 
   def cluster_linkage(self, k, linkage_type='single'):
-    if k not in self.hit_distances:
+    K['linkage_type'] = linkage_type;
+
+    if (k['id_a'], k['id_b']) not in self.hit_distances:
       print "You must run hit_distance() first!";
       return None;
     #fi
@@ -285,65 +303,92 @@ class proteny:
                       'median'   : hierarchy.median,
                       'ward'     : hierarchy.ward };
 
-    HC, D = self.hit_distances[k];
+    HC, D = self.hit_distances[(k['id_a'], k['id_b'])];
     L = {};
     for dk in D.keys():
       print dk;
       L[dk] = linkage_types[linkage_type](D[dk]);
     #efor
 
-    self.cluster_linkages[k] = (L, linkage_type);
+    self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])] = L;
 
-    return k;
+    return nk;
   #edef
 
   #############################################################################
 
-  def cluster_hits(self, k, CS=[20000]):
-    if (k not in self.hit_windows) or (k not in self.cluster_linkages):
-      print "You must run windows() and cluster_linkage() first!";
+  def cluster_hits(self, k, CS=20000):
+    k['CS'] = CS;
+
+    if ((k['id_a'], k['id_b'], k['WS']) not in self.hit_windows) or \
+       ((k['id_a'], k['id_b']) not in self.hit_distances) or \
+       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.cluster_linkages):
+      print "You must run windows(), hit_distance() and cluster_linkage() first!";
       return None;
     #fi
 
-    H,  O, scores, WS = self.hit_windows[k];
-    HC, D             = self.hit_distances[k];
-    L,  lt            = self.cluster_linkages[k];
+    H,  O, scores = self.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
+    HC, D         = self.hit_distances[(k['id_a'], k['id_b'])];
+    L,  lt        = self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])];
 
-    CD = [];
-    for cs in CS:
+    HC_clust = {};
+    for lk in L.keys():
+      linkage = L[lk];
+      hc      = HC[lk];
 
-      HC_clust = {};
-      for lk in L.keys():
-        linkage = L[lk];
-        hc      = HC[lk];
-
-        hclust  = hierarchy.fcluster(linkage, cs, criterion='distance');
-        nclust  = max(hclust);
-        clusts  = [ [] for i in xrange(nclust) ];
-        
-        for (h, c) in zip(hc, hclust):
-          clusts[c-1].append(h);
-        #efor
-        HC_clust[lk] = clusts;
+      hclust  = hierarchy.fcluster(linkage, cs, criterion='distance');
+      nclust  = max(hclust);
+      clusts  = [ [] for i in xrange(nclust) ];
+      
+      for (h, c) in zip(hc, hclust):
+        clusts[c-1].append(h);
       #efor
-
-      hit_clusts = [];
-      for lk in HC_clust.keys():
-        clusts = HC_clust[lk];
-        for C in clusts:
-          cd = smoothing.clust_description(H, O, scores, C);
-          hit_clusts.append(cd);
-        #efor
-      #efor
-      CD.append(hit_clusts);
+      HC_clust[lk] = clusts;
     #efor
 
-    self.hit_clusters[k] = (CD, CS);
+    hit_clusts = [];
+    for lk in HC_clust.keys():
+      clusts = HC_clust[lk];
+      for C in clusts:
+        cd = smoothing.clust_description(H, O, scores, C);
+        hit_clusts.append(cd);
+      #efor
+    #efor
+
+    self.hit_clusters[(k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS'])] = hit_clusts;
+
     return k;
   #edef
 
   #############################################################################
   
+  def cluster_regions(self, k, n=10):
+    #(a_chr, hits[0][0][0][0], a_start, a_end, b_chr, hits[0][0][1][0], b_start, b_end, n_hits, score, prots_a, prots_b)
+
+    if (k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS']) not in self.hit_clusters:
+      print "You must run cluster_hits() first!";
+      return None;
+    #fi
+
+    HC = self.hit_clusters[(k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS'])];
+    regs = [];
+
+    rcs = [];
+    HCj = HC[j];
+    HCj.sort(key=lambda x: x[9], reverse=True);
+    for i in xrange(min(n, len(HCj))):
+      hc = HCj[i];
+      a_chr, h1, a_start, a_end, b_chr, h2, b_start, b_end, n_hits, score, prots_a, prots_b = hc;
+      r = [ str(i), [ (self.org_names[k[0]], a_chr, a_start, a_end), 
+                      (self.org_names[k[1]], b_chr, b_start, b_end) ] ];
+      rcs.append(r);
+    #efor
+
+    return rcs;
+
+  #edef
+
+  #############################################################################
 
 #eclass
 
