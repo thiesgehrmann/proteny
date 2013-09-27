@@ -26,7 +26,7 @@ def example(org, chr, odir=None):
 
 ###############################################################################
 
-def agabi(odir = '%s/2-agabi' % dd):
+def agabi(odir = None):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta');
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz'));
   genome   = genome_a | Stack | genome_b;
@@ -49,7 +49,7 @@ def agabi(odir = '%s/2-agabi' % dd):
 
 ###############################################################################
 
-def schco2(odir = '%s/1b-schco2' % dd):
+def schco2(odir = None):
   genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz'));
   genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz'));
   

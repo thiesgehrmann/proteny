@@ -1,9 +1,24 @@
 from ibidas import *;
 import numpy as np;
 
+from ibidas.utils.util import debug_here;
+
 ###############################################################################
 
 def reindex_blast(br):
+  """ B + reindex_blast(br)
+      br: A rep of BLAST results.
+          Must contain at least:
+          _.a_chrid, _.a_geneid, _.a_exonid
+          _.b_chrid, _.b_geneid, _.b_exonid
+          _.a_start, _.a_end
+          _.b_start, _.b_end
+          _.pident, _.evalue, _.bitscore
+
+      Output:
+        B: A Rep of blast results with an index
+  """
+
   nbr = br.Shape()();
   ind = [i for i in xrange(nbr)];
 
@@ -25,6 +40,15 @@ def reindex_blast(br):
 ###############################################################################
 
 def sort_org(br, hits):
+  """ O, H = sort_org(br, hits)
+      br:   The output of reindex_blast
+      hits: A list which contains a list of information about a hit, prefixed by an empty list.
+
+      Output:
+        O: A list of hits sorted by start location
+        H: The updated list hits, containing indexes to find the sorted element
+  """
+
   chrs = br.chrid.Unique().Sort()();
 
   chr_hits = [];
@@ -44,6 +68,16 @@ def sort_org(br, hits):
 ###############################################################################
 
 def get_reg_hits(H, O, k, ws):
+  """L = get_reg_hits(H, O, k, ws)
+     H:  The output list of sort_org
+     O:  The output list of sort_org
+     k:  The ID of the hit
+     ws: The size of the window around the hit.
+
+     Outputs:
+      L: A list of hit IDs present in the window.
+  """
+
   hit = H[k];
   ids = [];
 
@@ -52,10 +86,10 @@ def get_reg_hits(H, O, k, ws):
     ids.append(set(get_reg_window(o[reg[0]], reg[1], ws)));
   #efor
 
-  overlap = reduce(lambda x,y: x ^ y, ids);
+  ovl = reduce(lambda x,y: x & y, ids);
 
   ret = [];
-  for i in overlap:
+  for i in ovl:
     ret.append(H[i]);
   #efor
 
@@ -65,6 +99,15 @@ def get_reg_hits(H, O, k, ws):
 ###############################################################################
 
 def get_reg_window(O, k, ws):
+  """ids = get_reg_window(O, k, ws):
+     O:  The output list of sort_org
+     k:  The ID if the hit
+     ws: The size of the window around the hit
+
+     Outputs:
+       ids: A list of IDs of hits around the hit.
+  """
+
   rhit = O[k];
   olen = len(O);
 
@@ -74,15 +117,17 @@ def get_reg_window(O, k, ws):
   dstream_i = k;
   ustream_i = k;
 
-  while dstream_i > 0:
-    if O[dstream_i][2] > min_start:
+  #debug_here();
+
+  while dstream_i-1 > 0:
+    if O[dstream_i-1][2] > min_start:
       dstream_i -= 1;
     else:
       break;
     #fi
   #ewhile
-  while ustream_i < olen:
-    if O[ustream_i][3] < max_end:
+  while ustream_i+1 < olen:
+    if O[ustream_i+1][3] < max_end:
       ustream_i += 1;
     else:
       break;
@@ -95,6 +140,13 @@ def get_reg_window(O, k, ws):
 ###############################################################################
 
 def score(L):
+  """s = score(L):
+     L: A list of scores
+
+     Outputs:
+       s: A combined score
+  """
+
   total = sum([l[-1] for l in L]) / len(L);
   return total;
 #efor
@@ -139,6 +191,23 @@ def overlap(r1, r2):
 ###############################################################################
 
 def distance(H, O, i, j):
+  """d = distance(H, O, i, j):
+     H: The output list of sort_org
+     O: The output list of sort_org
+     i: The ID of hit i
+     j: The ID of hit j
+
+                |-a-|
+     ---=========---============---
+        \\\\\\\\\\  ||||||||||||
+     ----=========--============---
+                 |-b|
+
+      d = a + b
+
+     Outputs:
+       d: The distance between hit i and hit j
+  """
   h1 = H[i];
   h2 = H[j];
 
@@ -171,6 +240,15 @@ def distance(H, O, i, j):
 ###############################################################################
 
 def condenseddm(H, O, L):
+  """cdm = condenseddm(H, O, L)
+     H: Output list from sort_org
+     O: Output list from sort_org
+     L: A list of hits
+
+     Outputs:
+       cdm:  A condensed distance matrix (Upper triangle of distance matrix as array
+  """
+
   nl = len(L);
 
   cdm = [];
@@ -187,7 +265,14 @@ def condenseddm(H, O, L):
 ###############################################################################
 
 def chr_pair_group(H):
-  """ NOTE: DOES NOT PRESERVE INDICES OF O LISTS! """
+  """HC = chr_pair_group(H)
+     H: Output list from sort_org
+
+     Group hits by chromosomes they exist on
+     NOTE: DOES NOT PRESERVE INDICES OF O LISTS!
+     Outputs:
+       HC: A dictionary of hits per pair of chromosomes
+  """
 
   H_chrs = {};
 
@@ -207,8 +292,18 @@ def chr_pair_group(H):
 ###############################################################################
 
 def clust_description(H, O, scores, C):
+  """cd = clust_description(H, O, scores, C):
+     H:      Output list of sort_org
+     O:      Output list of sort_org
+     scores: Scores per hit
+     C:      Hits in cluster
+
+     Outputs:
+       cd: A description of the cluster.
+  """
+
   hits        = [ H[i] for i in np.array(C, dtype=np.dtype('u8')) ];
-  hits_scores = [ scores[i][0] for i in C ];
+  hits_scores = [ scores[i] for i in C ];
   hits_a      = [ O[0][h[0][0][0]][h[0][0][1]] for h in hits ];
   hits_b      = [ O[1][h[0][1][0]][h[0][1][1]] for h in hits ];
   prots_a     = set([ h[2] for h in hits ]);

@@ -9,6 +9,9 @@ import numpy as np;
 sys.path.append('./utils');
 import seq as sequtils;
 import smoothing;
+import null
+
+from ibidas.utils.util import debug_here;
 
 ###############################################################################
 
@@ -183,6 +186,7 @@ class proteny:
   def blast(self, id_a = 0, id_b=1):
     if len(self.org_names) < 2:
       print "Cannot run BLAST, too few organisms added!";
+      return None;
     #fi
 
     a_exons = self.org_exons[id_a][_.end - _.start > 60] / tuple([ 'a_' + s for s in self.__exon_slice_names__]);
@@ -242,9 +246,11 @@ class proteny:
     print "Smoothing hits. This will take a while!";
     RS = [];
     for h in xrange(hlen):
-      print "%d/%d" % (h, hlen);
+      print "\r%d/%d" % (h+1, hlen),
+      sys.stdout.flush();
       RS.append(smoothing.get_reg_hits(H, O, h, WS));
     #efor
+    print "";
 
     scores = [ smoothing.score(RS[j]) for j in xrange(hlen)]
 
@@ -267,9 +273,11 @@ class proteny:
     HC = smoothing.chr_pair_group(H);
     D  = {};
 
-    i = 0;
-    for hc_k in HC.keys():
-      print i, len(HC.keys());
+    nk = len(HC.keys());
+    print "Calculating distances. This will take a while!";
+    for (i, hc_k) in enumerate(HC.keys()):
+      print "\r%d/%d" % (i+1, nk),
+      sys.stdout.flush();
       hc  = HC[hc_k];
       if len(hc) < 2:
         continue;
@@ -278,8 +286,9 @@ class proteny:
       if len(cdm) > 2:
         D[hc_k] = cdm;
       #fi
-      i += 1;
     #efor
+    print "";
+
     self.hit_distances[(k['id_a'], k['id_b'])] = (HC, D);
 
     return k;
@@ -288,7 +297,7 @@ class proteny:
   #############################################################################
 
   def cluster_linkage(self, k, linkage_type='single'):
-    K['linkage_type'] = linkage_type;
+    k['linkage_type'] = linkage_type;
 
     if (k['id_a'], k['id_b']) not in self.hit_distances:
       print "You must run hit_distance() first!";
@@ -305,14 +314,17 @@ class proteny:
 
     HC, D = self.hit_distances[(k['id_a'], k['id_b'])];
     L = {};
-    for dk in D.keys():
-      print dk;
+    print "Calculating linkages. This will take a while!";
+    nk = len(D.keys());
+    for (i, dk) in enumerate(D.keys()):
+      print "\r%d/%d" % (i+1, nk),
+      sys.stdout.flush();
       L[dk] = linkage_types[linkage_type](D[dk]);
     #efor
 
     self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])] = L;
 
-    return nk;
+    return k;
   #edef
 
   #############################################################################
@@ -329,14 +341,14 @@ class proteny:
 
     H,  O, scores = self.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
     HC, D         = self.hit_distances[(k['id_a'], k['id_b'])];
-    L,  lt        = self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])];
+    L             = self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])];
 
     HC_clust = {};
     for lk in L.keys():
       linkage = L[lk];
       hc      = HC[lk];
 
-      hclust  = hierarchy.fcluster(linkage, cs, criterion='distance');
+      hclust  = hierarchy.fcluster(linkage, CS, criterion='distance');
       nclust  = max(hclust);
       clusts  = [ [] for i in xrange(nclust) ];
       
@@ -374,13 +386,12 @@ class proteny:
     regs = [];
 
     rcs = [];
-    HCj = HC[j];
-    HCj.sort(key=lambda x: x[9], reverse=True);
-    for i in xrange(min(n, len(HCj))):
-      hc = HCj[i];
+    HC.sort(key=lambda x: x[9], reverse=True);
+    for i in xrange(min(n, len(HC))):
+      hc = HC[i];
       a_chr, h1, a_start, a_end, b_chr, h2, b_start, b_end, n_hits, score, prots_a, prots_b = hc;
-      r = [ str(i), [ (self.org_names[k[0]], a_chr, a_start, a_end), 
-                      (self.org_names[k[1]], b_chr, b_start, b_end) ] ];
+      r = [ str(i), [ (self.org_names[k['id_a']], a_chr, a_start, a_end), 
+                      (self.org_names[k['id_b']], b_chr, b_start, b_end) ] ];
       rcs.append(r);
     #efor
 

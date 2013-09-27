@@ -2,82 +2,87 @@ from ibidas import *;
 
 #############################################################################
 
-def write_data(PR, dir):
+def write_data(PR, k, dir):
+  """Write data for task k in directory dir"""
   files = {};
 
-  files['karyotype'], chr_colors = write_karyotype(PR, dir);
-  files['genes']                 = write_genes(PR, dir);
-  files['exons']                 = write_exons(PR, dir);
-  files['blast']                 = write_blast(PR, dir, chr_colors);
-  files['clusts']                = write_clusts(PR, dir, chr_colors);
+  files['karyotype'], chr_colors = write_karyotype(PR, k, dir);
+  files['genes']                 = write_genes(PR, k, dir);
+  files['exons']                 = write_exons(PR, k, dir);
+  files['blast']                 = write_blast(PR, k, dir, chr_colors);
+  files['clusts']                = write_clusts(PR, k, dir, chr_colors);
 
   return files;
 #edef
 
 #############################################################################
 
-def write_clusts(PR, dir, chr_colors):
+def write_clusts(PR, k, dir, chr_colors):
   fnames = [];
-  for (i, j) in PR.hit_clusters.keys():
-    (HD, CS) = PR.hit_clusters[(i,j)];
 
-    color_org = (PR.org_names[i], 0) if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 4);
-    color = lambda h: chr_colors[color_org[0]][h[color_org[1]]];
+  i = k['id_a'];
+  j = k['id_b'];
 
-    for (l, cs) in enumerate(CS):
-      hd = HD[l];
-      filename = '%s/clusters_%s_%s_%d_avg_sum_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], cs);
-      fnames.append(filename);
-      fd = open(filename, 'w');
-      for (k, h) in enumerate(hd):
-        fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\ta_chrid=%d,nhits=%d,score=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], h[0], h[2], h[3], h[1], h[8], h[9], ';'.join(['%s' % id for id in h[10]]), color(h)));
-        fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tb_chrid=%d,nhits=%d,score=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], h[4], h[6], h[7], h[5], h[8], h[9], ';'.join(['%s' % id for id in h[11]]), color(h)));
-      #efor
-      fd.close();
-    #efor
+  HC = PR.hit_clusters[(k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS'])];
+
+  color_org = (PR.org_names[i], 0) if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 4);
+  color = lambda h: chr_colors[color_org[0]][h[color_org[1]]];
+
+  filename = '%s/clusters_%s_%s_%d_%s_%d_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], k['WS'], k['linkage_type'], k['CS']);
+  fnames.append(filename);
+  fd = open(filename, 'w');
+  for (k, h) in enumerate(HC):
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\ta_chrid=%d,nhits=%d,score=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], h[0], h[2], h[3], h[1], h[8], h[9], ';'.join(['%s' % id for id in h[10]]), color(h)));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tb_chrid=%d,nhits=%d,score=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], h[4], h[6], h[7], h[5], h[8], h[9], ';'.join(['%s' % id for id in h[11]]), color(h)));
   #efor
+  fd.close();
+
   return fnames;
 #edef
 
 #############################################################################
 
-def write_blast(PR, dir, chr_colors):
+def write_blast(PR, k, dir, chr_colors):
+
   fnames = [];
   D = dict([(slicename, i) for (i, slicename) in enumerate(PR.__blast_slice_names__)]);
-  for (i,j) in PR.blast_hits.keys():
-    F = PR.blast_hits[(i,j)];
-    filename = '%s/blast.%s.%s.tsv' % (dir, PR.org_names[i], PR.org_names[j]);
-    fnames.append(filename);
-    fd = open(filename, 'w');
 
-    color_org = (PR.org_names[i], 'a_chrid') if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 'b_chrid');
-    color = lambda h: chr_colors[color_org[0]][h[D[color_org[1]]]];
+  i = k['id_a'];
+  j = k['id_b'];
 
-    H = zip(*F());
-    for (hitid, hit) in enumerate(H):
-      fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\ta_strand=%s,pident=%f,evalue=%f,bitscore=%f,a_geneid=%s,a_transcriptid=%s,a_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
-        % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[i], hit[D['a_chrid']], \
-           hit[D['a_start']], hit[D['a_end']], \
-           ('p' if (hit[D['a_strand']]) == '+' else 'n'), \
-           hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
-           str(hit[D['a_geneid']]), str(hit[D['a_transcriptid']]), hit[D['a_exonid']], \
-           color(hit), hit[D['bitscore']]));
-      fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\tb_strand=%s,pident=%f,evalue=%f,bitscore=%f,b_geneid=%s,b_transcriptid=%s,b_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
-        % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[j], hit[D['b_chrid']], \
-           hit[D['b_start']], hit[D['b_end']], \
-           ('p' if (hit[D['b_strand']]) == '+' else 'n'), \
-           hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
-           str(hit[D['b_geneid']]), str(hit[D['b_transcriptid']]), hit[D['b_exonid']], \
-           color(hit), hit[D['bitscore']]));
-    #efor
-    fd.close();
+  F = PR.blast_hits[(i,j)];
+  filename = '%s/blast.%s.%s.tsv' % (dir, PR.org_names[i], PR.org_names[j]);
+  fnames.append(filename);
+  fd = open(filename, 'w');
+
+  color_org = (PR.org_names[i], 'a_chrid') if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 'b_chrid');
+  color = lambda h: chr_colors[color_org[0]][h[D[color_org[1]]]];
+
+  H = zip(*F());
+  for (hitid, hit) in enumerate(H):
+    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\ta_strand=%s,pident=%f,evalue=%f,bitscore=%f,a_geneid=%s,a_transcriptid=%s,a_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
+      % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[i], hit[D['a_chrid']], \
+         hit[D['a_start']], hit[D['a_end']], \
+         ('p' if (hit[D['a_strand']]) == '+' else 'n'), \
+         hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
+         str(hit[D['a_geneid']]), str(hit[D['a_transcriptid']]), hit[D['a_exonid']], \
+         color(hit), hit[D['bitscore']]));
+    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\tb_strand=%s,pident=%f,evalue=%f,bitscore=%f,b_geneid=%s,b_transcriptid=%s,b_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
+      % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[j], hit[D['b_chrid']], \
+         hit[D['b_start']], hit[D['b_end']], \
+         ('p' if (hit[D['b_strand']]) == '+' else 'n'), \
+         hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
+         str(hit[D['b_geneid']]), str(hit[D['b_transcriptid']]), hit[D['b_exonid']], \
+         color(hit), hit[D['bitscore']]));
   #efor
+  fd.close();
+
   return fnames;
 #edef
 
 #############################################################################
   # Generate karyotype
-def write_karyotype(PR, dir):
+def write_karyotype(PR, k, dir):
   fnames = [];
   chr_colors = {};
 
@@ -85,8 +90,8 @@ def write_karyotype(PR, dir):
   f = lambda x, y: ((((x-1)*(y/2 -1)) % y) + 1);
   f = lambda x, y: x;
 
-  for (i, name) in enumerate(PR.org_names):
-    
+  for i in [k['id_a'], k['id_b']]:
+    name     = PR.org_names[i];
     filename = '%s/karyotype.%s.tsv' % (dir, name);
     fnames.append(filename);
     fd = open(filename, 'w');
@@ -110,12 +115,12 @@ def write_karyotype(PR, dir):
 #edef
 
 #############################################################################
-  # Generate gene & exon files
-def write_genes(PR, dir):
+  # Generate gene files
+def write_genes(PR, k, dir):
   fnames = { 'text':[], 'data':[] };
 
-
-  for (i, E) in enumerate(PR.org_exons):
+  for i in [k['id_a'], k['id_b']]:
+    E            = PR.org_exons[i];
     filename     = '%s/genes.%s.tsv'      % (dir, PR.org_names[i]);
     textfilename = '%s/genes_text.%s.tsv' % (dir, PR.org_names[i]);
 
@@ -140,9 +145,10 @@ def write_genes(PR, dir):
 
 #############################################################################
 
-def write_exons(PR, dir):
+def write_exons(PR, k, dir):
   fnames = [];
-  for (i,E) in enumerate(PR.org_exons):
+  for i in [k['id_a'], k['id_b']]:
+    E        = PR.org_exons[i];
     filename = '%s/exons.%s.tsv' % (dir, PR.org_names[i]);
     fnames.append(filename);
     fd = open(filename, 'w');

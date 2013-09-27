@@ -54,7 +54,7 @@ PR.save(savename);
 # VISUALIZE
 
   # Export data into a CIRCOS format
-files = cdata.write_data(PR, '%s/data' % circdir);
+files = cdata.write_data(PR, k, '%s/data' % circdir);
 
   # Visualize relationships between chromosomes
 anchrs = [ "aniger_513_88_An%02d" % (i+1)  for i in xrange(an2[2].Shape()()) ];

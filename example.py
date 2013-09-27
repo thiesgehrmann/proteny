@@ -67,7 +67,7 @@ regions = \
       ('random', [ ('schco2', 'scaffold_5',  2483079, 2483664), ('agabi', 'scaffold_8',  177699,  179015 ) ] ) ];
 
   # Export data into a CIRCOS format
-files = cdata.write_data(PR, '%s/data' % circdir);
+files = cdata.write_data(PR, k, '%s/data' % circdir);
 
   # Visualize a region
 for reg in regions:
