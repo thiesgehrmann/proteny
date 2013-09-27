@@ -139,7 +139,7 @@ chromosomes                 = %s
     <rules>
       flow = continue
       <rule>
-        condition = var(score) < 3 || var(nhits) < 20
+        condition = var(score) < 0.8
         show      = no
       </rule>
       <rule>

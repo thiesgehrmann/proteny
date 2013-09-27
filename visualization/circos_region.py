@@ -214,7 +214,6 @@ show_tick_labels    = yes
   #############################################################################
 
   def make_circos(self, outdir):
-    self.make_conf(outdir);
     i_d = self.make_ideogram(outdir);
     l_d = self.make_links(outdir);
     p_d = self.make_plots(outdir);
@@ -239,7 +238,7 @@ show_tick_labels    = yes
   def make_conf(self, outdir, i_d, l_d, p_d, t_d):
     filename = '%s/%s.conf' % (self.outdir, self.name);
     fd = open(filename, 'w');
-    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, self.make_region()));
+    fd.write(self.TXT_circos_conf % (','.join(self.karyotypes), self.chromosomes_units, self.make_region(), i_d, l_d, p_d, t_d));
     fd.close();
   #edef
 
