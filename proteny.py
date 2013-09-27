@@ -9,7 +9,7 @@ import numpy as np;
 sys.path.append('./utils');
 import seq as sequtils;
 import smoothing;
-import null
+import cluster_score as cscore;
 
 from ibidas.utils.util import debug_here;
 
@@ -358,12 +358,18 @@ class proteny:
       HC_clust[lk] = clusts;
     #efor
 
+    chrs_a = cscore.prep_exon_list(self.org_exons[k['id_a']]);
+    chrs_b = cscore.prep_exon_list(self.org_exons[k['id_b']]);
+
     hit_clusts = [];
     for lk in HC_clust.keys():
       clusts = HC_clust[lk];
       for C in clusts:
-        cd = smoothing.clust_description(H, O, scores, C);
-        hit_clusts.append(cd);
+        cd = list(smoothing.clust_description(H, O, scores, C));
+        n_exons = cscore.count_exons_in_reg(chrs_a, cd[0], cd[2], cd[3]) + \
+                  cscore.count_exons_in_reg(chrs_b, cd[4], cd[6], cd[7]);
+        cd[9] = (cd[9] / float(n_exons)) * cd[8];
+        hit_clusts.append(tuple(cd));
       #efor
     #efor
 
