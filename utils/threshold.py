@@ -41,7 +41,7 @@ def gene_distances(PR, k):
 
 ###############################################################################
 
-def getpercentile(dists):
+def getpercentile(dists, p=0.95):
   """pb_values = getpercentile(dists, p)
      dists: Output of gene_distances
      p:     Percentile

@@ -7,6 +7,7 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
+import threshold as tr;
 import proteny as pp;
 import data;
 
@@ -34,6 +35,7 @@ id_b = PR.add_org(*ag, isfile=False);
 # ANALYSIS
 
   # Run BLAST
+#k = (0, 1, 20000, 'single', 20000);
 k = PR.blast(id_a=id_a, id_b=id_b);
   # Calculate window scores for these results
 k = PR.windows(k);
@@ -44,11 +46,18 @@ k = PR.cluster_linkage(k);
   # Cut the dendrogram.
 k = PR.cluster_hits(k);
 
+CS = tr.get_tc_threshold(PR, k);
+
+  # Cut the dendrogram.
+k2 = PR.cluster_hits(k, CS);
+
 ###############################################################################
 # SAVE
 
   # Save our calculations
 PR.save(savename);
+
+K = [ k, k2 ];
 
 ###############################################################################
 # VISUALIZE
@@ -66,17 +75,20 @@ regions = \
       ('wc2',    [ ('schco2', 'scaffold_2',  844864,  846181 ), ('agabi', 'scaffold_2',  875026,  876315 ) ] ),
       ('random', [ ('schco2', 'scaffold_5',  2483079, 2483664), ('agabi', 'scaffold_8',  177699,  179015 ) ] ) ];
 
-  # Export data into a CIRCOS format
-files = cdata.write_data(PR, k, '%s/data' % circdir);
+for (j, o) in enumerate(K):
 
-  # Visualize a region
-for reg in regions:
-  cr.circos_region(files, reg, 30000, circdir, 'schco2_reg_'+reg[0]);
+    # Export data into a CIRCOS format
+  files = cdata.write_data(PR, k, '%s/data' % circdir);
+
+    # Visualize a region
+  for reg in regions:
+    cr.circos_region(files, reg, 30000, circdir, ('schco2_reg_%d' % (j)) + reg[0]);
+  #efor
+
+    # Visualize relationships between chromosomes
+  agabichrs = ["agabi_scaffold_%d" % (i+1) for i in xrange(21) ];
+  for i in xrange(36):
+   cc.circos_chr(files, agabichrs + ["schco2_scaffold_%d" % (i+1)], ["schco2_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%d,%d" % (i+1, j) );
+  #efor
+
 #efor
-
-  # Visualize relationships between chromosomes
-agabichrs = ["agabi_scaffold_%d" % (i+1) for i in xrange(21) ];
-for i in xrange(36):
- cc.circos_chr(files, agabichrs + ["schco2_scaffold_%d" % (i+1)], ["schco2_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%d" % (i+1) );
-#efor
-
