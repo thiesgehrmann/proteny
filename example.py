@@ -7,7 +7,6 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
-import threshold as tr;
 import proteny as pp;
 import data;
 
@@ -45,11 +44,6 @@ k = PR.hit_distance(k);
 k = PR.cluster_linkage(k);
   # Cut the dendrogram.
 k = PR.cluster_hits(k);
-
-CS = tr.get_tc_threshold(PR, k);
-
-  # Cut the dendrogram.
-k2 = PR.cluster_hits(k, CS);
 
 ###############################################################################
 # SAVE

@@ -9,7 +9,10 @@ import numpy as np;
 sys.path.append('./utils');
 import seq as sequtils;
 import smoothing;
-import cluster_score as cscore;
+import cluster as cluster;
+reload(cluster);
+import util as util;
+reload(util);
 
 from ibidas.utils.util import debug_here;
 
@@ -23,12 +26,15 @@ class proteny:
   org_genomes = [];
   org_genes   = [];
   org_exons   = [];
+  org_chrs    = [];
 
-  blast_hits       = {};
-  hit_windows      = {};
-  hit_distances    = {};
-  cluster_linkages = {};
-  hit_clusters     = {};
+  blast_hits          = {};
+  hit_window_index    = None;
+  hit_windows         = {};
+  hit_distances       = {};
+  hit_dendrograms     = {};
+  hit_clusters        = {};
+  hit_clusters_height = {};
 
   ###############################################################################
 
@@ -37,12 +43,16 @@ class proteny:
     self.org_genomes = [];
     self.org_genes   = [];
     self.org_exons   = [];
+    self.org_chrs    = [];
 
-    self.blast_hits       = {};
-    self.hit_windows      = {};
-    self.hit_distances    = {};
-    self.cluster_linkages = {};
-    self.hit_clusters     = {};
+    self.blast_hits          = {};
+    self.hits                = {};
+    self.hit_window_index    = None;
+    self.hit_windows         = {};
+    self.hit_distances       = {};
+    self.hit_dendrograms     = {};
+    self.hit_clusters        = {};
+    self.hit_clusters_height = {};
 
     if not(load == None):
       p = cPickle.load(open(load, 'r'));
@@ -55,7 +65,7 @@ class proteny:
   ###############################################################################
 
   def key(self, k):
-    key_elems = [ 'id_a' , 'id_b', 'WS', 'linkage_type', 'CS' ];
+    key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H' ];
     nk        = dict([ (f, None) for f in key_elems]);
 
     for (i,v) in enumerate(k):
@@ -78,6 +88,8 @@ class proteny:
   #############################################################################
 
   def add_org(self, name, genes_data, genome_data, isfile=True):
+    id = len(self.org_names);
+
     genome = self.load_genome(genome_data, isfile=isfile);
     genes  = self.load_gene_defs(genes_data, isfile=isfile);
 
@@ -85,8 +97,9 @@ class proteny:
     self.org_genomes.append(genome);
     self.org_genes.append(genes);
     self.org_exons.append(self.translate_exons(genome, genes));
+    self.org_chrs.append(util.prep_exon_list(self.org_exons[id]));
 
-    return len(self.org_names)-1;
+    return id;
   #edef
 
   ###############################################################################
@@ -221,25 +234,36 @@ class proteny:
 
   ###############################################################################
 
-  def windows(self, k, WS=20000):
+  def windows(self, k, WS=0):
 
     k['WS'] = WS;
-    BR = self.blast_hits[(k['id_a'], k['id_b'])];
-    F  = smoothing.reindex_blast(BR);
 
-    hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.pident, _.evalue, _.bitscore);
-    BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
-    BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
+    if self.hit_window_index != None:
+      H, O = self.hit_window_index;
+    else:
+      if (k['id_a'], k['id_b']) not in self.blast_hits:
+        print "You need to run blast() first!";
+        return None;
+      #fi
 
-    brs  = [ BR_a, BR_b ];
+      BR = self.blast_hits[(k['id_a'], k['id_b'])];
+      F  = util.reindex_blast(BR);
 
-    H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
-    O = [];
+      hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.pident, _.evalue, _.bitscore);
+      BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
+      BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
 
-    for br in brs:
-      org_ind, H = smoothing.sort_org(br, H);
-      O.append(org_ind);
-    #efor
+      brs  = [ BR_a, BR_b ];
+
+      H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
+      O = [];
+
+      for br in brs:
+        org_ind, H = smoothing.sort_org(br, H);
+        O.append(org_ind);
+      #efor
+      self.hit_window_index = (H, O);
+    #fi
 
     hlen = len(H);
 
@@ -254,7 +278,18 @@ class proteny:
 
     scores = [ smoothing.score(RS[j]) for j in xrange(hlen)]
 
-    self.hit_windows[(k['id_a'], k['id_b'], k['WS'])] = (H, O, scores);
+    self.hit_windows[(k['id_a'], k['id_b'], k['WS'])] = scores;
+
+    return k;
+  #edef
+
+  #############################################################################
+
+  def hit_index(self, k):
+    BR = self.blast_hits[(k['id_a'], k['id_b'])];
+    F  = util.reindex_blast(BR);
+
+    self.hits[(k['id_a'], k['id_b'])] = zip(*F());
 
     return k;
   #edef
@@ -262,147 +297,86 @@ class proteny:
   #############################################################################
 
   def hit_distance(self, k):
-
-    if (k['id_a'], k['id_b'], k['WS']) not in self.hit_windows:
-      print "You must run windows() first!";
+    if (k['id_a'], k['id_b']) not in self.hits:
+      print "You must run hit_index() first!";
       return None;
     #fi
 
-    H, O, scores = self.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
+    hits = self.hits[(k['id_a'], k['id_b'])];
 
-    HC = smoothing.chr_pair_group(H);
-    D  = {};
-
-    nk = len(HC.keys());
-    print "Calculating distances. This will take a while!";
-    for (i, hc_k) in enumerate(HC.keys()):
-      print "\r%d/%d" % (i+1, nk),
-      sys.stdout.flush();
-      hc  = HC[hc_k];
-      if len(hc) < 2:
-        continue;
-      #fi
-      cdm = np.array(smoothing.condenseddm(H, O, hc), dtype=np.dtype('u8'));
-      if len(cdm) > 2:
-        D[hc_k] = cdm;
-      #fi
-    #efor
-    print "";
+    HC, D = cluster.calc_distances(hits);
 
     self.hit_distances[(k['id_a'], k['id_b'])] = (HC, D);
-
+    
     return k;
   #edef
 
   #############################################################################
 
-  def cluster_linkage(self, k, linkage_type='single'):
+  def hit_dendrogram(self, k, linkage_type='single'):
     k['linkage_type'] = linkage_type;
-
+    
     if (k['id_a'], k['id_b']) not in self.hit_distances:
       print "You must run hit_distance() first!";
       return None;
     #fi
-
-    linkage_types = { 'single'   : hierarchy.single,
-                      'complete' : hierarchy.complete,
-                      'average'  : hierarchy.average,
-                      'weighted' : hierarchy.weighted,
-                      'centroid' : hierarchy.centroid,
-                      'median'   : hierarchy.median,
-                      'ward'     : hierarchy.ward };
-
+    
     HC, D = self.hit_distances[(k['id_a'], k['id_b'])];
-    L = {};
-    print "Calculating linkages. This will take a while!";
-    nk = len(D.keys());
-    for (i, dk) in enumerate(D.keys()):
-      print "\r%d/%d" % (i+1, nk),
-      sys.stdout.flush();
-      L[dk] = linkage_types[linkage_type](D[dk]);
-    #efor
 
-    self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])] = L;
-
+    T = cluster.calc_dendrograms(HC, D, linkage_type);
+    
+    self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])] = T;
+    
     return k;
   #edef
 
   #############################################################################
 
-  def cluster_hits(self, k, CS=20000):
-    k['CS'] = CS;
+  def hit_cluster(self, k):
 
-    if ((k['id_a'], k['id_b'], k['WS']) not in self.hit_windows) or \
+    if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \
-       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.cluster_linkages):
-      print "You must run windows(), hit_distance() and cluster_linkage() first!";
+       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.hit_dendrograms):
+      print "You must run hit_index(), hit_distance() and hit_dendrogram() first!";
       return None;
     #fi
+    hits  = self.hits[(k['id_a'], k['id_b'])];
+    T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
 
-    H,  O, scores = self.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
-    HC, D         = self.hit_distances[(k['id_a'], k['id_b'])];
-    L             = self.cluster_linkages[(k['id_a'], k['id_b'], k['linkage_type'])];
+    chrs_a = self.org_chrs[k['id_a']];
+    chrs_b = self.org_chrs[k['id_b']];
 
-    HC_clust = {};
-    for lk in L.keys():
-      linkage = L[lk];
-      hc      = HC[lk];
+    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b);
 
-      hclust  = hierarchy.fcluster(linkage, CS, criterion='distance');
-      nclust  = max(hclust);
-      clusts  = [ [] for i in xrange(nclust) ];
-      
-      for (h, c) in zip(hc, hclust):
-        clusts[c-1].append(h);
-      #efor
-      HC_clust[lk] = clusts;
-    #efor
-
-    chrs_a = cscore.prep_exon_list(self.org_exons[k['id_a']]);
-    chrs_b = cscore.prep_exon_list(self.org_exons[k['id_b']]);
-
-    hit_clusts = [];
-    for lk in HC_clust.keys():
-      clusts = HC_clust[lk];
-      for C in clusts:
-        cd = list(smoothing.clust_description(H, O, scores, C));
-        n_exons = cscore.count_exons_in_reg(chrs_a, cd[0], cd[2], cd[3]) + \
-                  cscore.count_exons_in_reg(chrs_b, cd[4], cd[6], cd[7]);
-        cd[9] = (cd[9] / float(n_exons)) * cd[8];
-        hit_clusts.append(tuple(cd));
-      #efor
-    #efor
-
-    self.hit_clusters[(k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS'])] = hit_clusts;
+    self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'])] = C;
 
     return k;
   #edef
 
   #############################################################################
-  
-  def cluster_regions(self, k, n=10):
-    #(a_chr, hits[0][0][0][0], a_start, a_end, b_chr, hits[0][0][1][0], b_start, b_end, n_hits, score, prots_a, prots_b)
 
-    if (k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS']) not in self.hit_clusters:
-      print "You must run cluster_hits() first!";
+  def hit_cluster_height(self, k, H):
+
+    if ((k['id_a'], k['id_b']) not in self.hits) or \
+       ((k['id_a'], k['id_b']) not in self.hit_distances) or \
+       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.hit_dendrograms):
+      print "You must run hit_index(), hit_distance() and hit_dendrogram() first!";
       return None;
     #fi
 
-    HC = self.hit_clusters[(k['id_a'], k['id_b'], k['WS'], k['linkage_type'], k['CS'])];
-    regs = [];
+    k['H'] = H;
 
-    rcs = [];
-    HC.sort(key=lambda x: x[9], reverse=True);
-    for i in xrange(min(n, len(HC))):
-      hc = HC[i];
-      a_chr, h1, a_start, a_end, b_chr, h2, b_start, b_end, n_hits, score, prots_a, prots_b = hc;
-      r = [ str(i), [ (self.org_names[k['id_a']], a_chr, a_start, a_end), 
-                      (self.org_names[k['id_b']], b_chr, b_start, b_end) ] ];
-      rcs.append(r);
-    #efor
-
-    return rcs;
-
+    hits  = self.hits[(k['id_a'], k['id_b'])];
+    T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
+    
+    chrs_a = self.org_chrs[k['id_a']];
+    chrs_b = self.org_chrs[k['id_b']];
+    
+    C = cluster.calc_clusters_height(T, hits, chrs_a, chrs_b, H);
+    
+    self.hit_clusters_height[(k['id_a'], k['id_b'], k['linkage_type'], k['H'])] = C;
+    
+    return k;
   #edef
 
   #############################################################################
