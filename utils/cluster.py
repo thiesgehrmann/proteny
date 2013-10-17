@@ -8,6 +8,8 @@ from scipy.cluster import hierarchy;
 import numpy as np;
 from ibidas import *;
 
+import cluster_null as null;
+reload(null);
 import util as util;
 reload(util);
 
@@ -267,6 +269,11 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, t=0.05):
   C = [];
   D = {};
 
+  dsize = lambda d: sum([ len(d[k]) for k in d])
+
+  nd = null.cluster_null_clt([ h[13] for h in hits], dsize(chrs_a), dsize(chrs_b));
+                              
+
   while len(istack) > 0:
 
     index = istack.pop();
@@ -274,16 +281,10 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, t=0.05):
     I, J, dist, ids     = T[index];
     score, exc_a, exc_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
 
-    #if (exc_a, exc_b) not in D:
-    #  D[(exc_a, exc_b)] = gen_distribution(exc_a, exc_b, hits, chrs_a, chrs_b);
-    #  d = D[(exc_a, exc_b)];
-    ##fi
-    #d = D[(exc_a, exc_b)];
-
-    #if pvalue(score, d) < t:
-    #  C.append((ids, score));
-    if score > t:
-      cdesc = clust_description(hits, ids, score);
+    p = nd.pvalue(exc_a, exc_b, score);
+    print '%2.10f %10d %10d %2.10f' % (p, exc_a, exc_b, score);
+    if p < 0.05:
+      cdesc = clust_description(hits, ids, score, p);
       C.append(cdesc);
     else:
       if not(I is None):
@@ -380,12 +381,13 @@ def condenseddm(hits, L):
 
 ###############################################################################
 
-def clust_description(hits, C, score):
+def clust_description(hits, C, score, p):
   """cd = clust_description(H, O, scores, C):
-     H:      Output list of sort_org
-     O:      Output list of sort_org
-     scores: Scores per hit
-     C:      Hits in cluster
+     H:     Output list of sort_org
+     O:     Output list of sort_org
+     score: Scores per hit
+     p:     The pvalue of this cluster
+     C:     Hits in cluster
 
      Outputs:
        cd: A description of the cluster.
@@ -405,7 +407,7 @@ def clust_description(hits, C, score):
   b_start = min([ h[9]  for h in hits ]);
   b_end   = max([ h[10] for h in hits ]);
 
-  return (a_chr, a_start, a_end, b_chr, b_start, b_end, n_hits, score, prots_a, prots_b, C);
+  return (a_chr, a_start, a_end, b_chr, b_start, b_end, n_hits, score, p, prots_a, prots_b, C);
 #edef
 
 ###############################################################################

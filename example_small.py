@@ -22,7 +22,7 @@ circdir  = 'circos';
   # Download data for Schizophyllum commune
 sc = data.example(data.schco2, 'scaffold_1');
   # Download data for Agaricus bisporus
-ag = data.example(data.agabi, 'scaffold_14');
+ag = data.example(data.agabi, 'scaffold_2');
 
   # Prepare the protenty analysis
 PR = pp.proteny();
@@ -34,17 +34,20 @@ id_b = PR.add_org(*ag, isfile=False);
 ###############################################################################
 # ANALYSIS
 
+k = PR.analyze(id_a=id_a, id_b=id_b);
+
   # Run BLAST
-k = PR.blast(id_a=id_a, id_b=id_b);
+#k = PR.blast(id_a=id_a, id_b=id_b);
   # Calculate window scores for these results
-k = PR.hit_index(k);
+#k = PR.hit_index(k);
   # Calculate genomic distances between ALL hits on different chromosomes
-k = PR.hit_distance(k);
+#k = PR.hit_distance(k);
   # Using a specified linkage, perform agglomerative clustering
-k = PR.hit_dendrogram(k);
+#k = PR.hit_dendrogram(k);
 
   # Cut the dendrogram.
-k = PR.hit_cluster_height(k, 2000);
+#k = PR.hit_cluster_height(k, 2000);
+#k = PR.hit_cluster();
 
 ###############################################################################
 # SAVE

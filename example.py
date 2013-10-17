@@ -33,17 +33,7 @@ id_b = PR.add_org(*ag, isfile=False);
 ###############################################################################
 # ANALYSIS
 
-  # Run BLAST
-#k = (0, 1, 20000, 'single', 20000);
-k = PR.blast(id_a=id_a, id_b=id_b);
-  # Calculate window scores for these results
-k = PR.windows(k);
-  # Calculate genomic distances between ALL hits on different chromosomes
-k = PR.hit_distance(k);
-  # Using a specified linkage, perform agglomerative clustering
-k = PR.cluster_linkage(k);
-  # Cut the dendrogram.
-k = PR.cluster_hits(k);
+k = PR.analyze(id_a=id_a, id_b=id_b);
 
 ###############################################################################
 # SAVE

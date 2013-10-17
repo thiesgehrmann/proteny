@@ -64,6 +64,25 @@ class proteny:
 
   ###############################################################################
 
+  def analyze(self, id_a=0, id_b=1):
+      # Run BLAST
+    k = self.blast(id_a=id_a, id_b=id_b);
+      # Calculate window scores for these results
+    k = self.hit_index(k);
+      # Calculate genomic distances between ALL hits on different chromosomes
+    k = self.hit_distance(k);
+      # Using a specified linkage, perform agglomerative clustering
+    k = self.hit_dendrogram(k);
+
+      # Cut the dendrogram.
+    #k = PR.hit_cluster_height(k, 2000);
+    k = self.hit_cluster();
+
+    return k;
+  #edef
+
+  ###############################################################################
+
   def key(self, k):
     key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H' ];
     nk        = dict([ (f, None) for f in key_elems]);
