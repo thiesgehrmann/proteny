@@ -148,8 +148,8 @@ def score_dendrogram_node(T, n, hits, chrs_a, chrs_b):
 
   I, J, dist, ids = T[n];
   hits = [ hits[i] for i in ids ];
-  hit_ex_a = [ (h[2], h[3]) for h in hits ];
-  hit_ex_b = [ (h[5], h[6]) for h in hits ];
+#  hit_ex_a = [ (h[2], h[3]) for h in hits ];
+#  hit_ex_b = [ (h[5], h[6]) for h in hits ];
 
   start_a = min([ h[7] for h in hits]);
   end_a   = max([ h[8] for h in hits]);
@@ -161,17 +161,17 @@ def score_dendrogram_node(T, n, hits, chrs_a, chrs_b):
   exc_b = count_exons_in_reg(chrs_b, h[4], start_b, end_b);
 
     # How many exons are "extra", or unaccounted for?
-  dex_a = exc_a - len(set(hit_ex_a));
-  dex_b = exc_b - len(set(hit_ex_b));
+#  dex_a = exc_a - len(set(hit_ex_a));
+#  dex_b = exc_b - len(set(hit_ex_b));
 
     # How many ends do we have in total?
-  ends_a = len(hit_ex_a) + dex_a;
-  ends_b = len(hit_ex_b) + dex_b;
+#  ends_a = len(hit_ex_a) + dex_a;
+#  ends_b = len(hit_ex_b) + dex_b;
 
   bitscore_sum = sum([h[13] for h in hits]);
-  score = (2 * bitscore_sum) / (ends_a + ends_b);
+#  score = bitscore_sum / (exc_a * exc_b);
 
-  return (score, exc_a, exc_b);
+  return (bitscore_sum, exc_a, exc_b);
 
 #edef
 
@@ -219,7 +219,7 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
     score, exc_a, exc_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
 
     if dist <= H:
-      cdesc = clust_description(hits, ids, score);
+      cdesc = clust_description(hits, ids, score, 0);
       C.append(cdesc);
     else:
       if not(I is None):
@@ -240,10 +240,13 @@ def calc_clusters(T, hits, chrs_a, chrs_b, t=None):
 
   C = [];
 
+  dsize = lambda d: sum([ len(d[k]) for k in d]);
+  nd = null.cluster_null_clt([ h[13] for h in hits], dsize(chrs_a), dsize(chrs_b));
+
   for k in T.keys():
     t = T[k];
 
-    c = cut_dendrogram(t, hits, chrs_a, chrs_b);
+    c = cut_dendrogram(t, hits, chrs_a, chrs_b, nd);
 
     C = C + c;
   #efor
@@ -254,7 +257,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, t=None):
 
 ###############################################################################    
 
-def cut_dendrogram(T, hits, chrs_a, chrs_b, t=0.05):
+def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, t=0.05):
   """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
    Inputs
        T       The linkage tree
@@ -268,11 +271,6 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, t=0.05):
   istack = [ -1 ];
   C = [];
   D = {};
-
-  dsize = lambda d: sum([ len(d[k]) for k in d])
-
-  nd = null.cluster_null_clt([ h[13] for h in hits], dsize(chrs_a), dsize(chrs_b));
-                              
 
   while len(istack) > 0:
 

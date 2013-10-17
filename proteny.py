@@ -65,6 +65,7 @@ class proteny:
   ###############################################################################
 
   def analyze(self, id_a=0, id_b=1):
+
       # Run BLAST
     k = self.blast(id_a=id_a, id_b=id_b);
       # Calculate window scores for these results
@@ -75,7 +76,6 @@ class proteny:
     k = self.hit_dendrogram(k);
 
       # Cut the dendrogram.
-    #k = PR.hit_cluster_height(k, 2000);
     k = self.hit_cluster();
 
     return k;
