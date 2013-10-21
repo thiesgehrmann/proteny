@@ -351,7 +351,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k):
+  def hit_cluster(self, k, alpha=0.05):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \
@@ -359,15 +359,18 @@ class proteny:
       print "You must run hit_index(), hit_distance() and hit_dendrogram() first!";
       return None;
     #fi
+
+    k['alpha'] = alpha;
+
     hits  = self.hits[(k['id_a'], k['id_b'])];
     T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
 
     chrs_a = self.org_chrs[k['id_a']];
     chrs_b = self.org_chrs[k['id_b']];
 
-    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b);
+    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, alpha=alpha);
 
-    self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'])] = C;
+    self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])] = C;
 
     return k;
   #edef

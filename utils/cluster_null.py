@@ -20,15 +20,17 @@ class cluster_null_clt:
   #############################################################################
 
   def estmu(self, Ea, Eb):
-    self.mu = sum(self.scores) / (Ea * Eb);
+    n = Ea * Eb;
+    self.mu = sum(self.scores) / n;
   #edef
 
   #############################################################################
 
   def ests2(self, Ea, Eb):
     n = Ea * Eb;
-    zeros = [ 0 ] * (n - len(self.scores));
-    self.s2 = np.var(self.scores + zeros);
+    nonzeros = [ (s - self.mu)**2 for s in self.scores ];
+    zeros    = (self.mu**2) * (n - len(self.scores));
+    self.s2 = (1.0/n) * (sum(nonzeros) + zeros);
   #edef
 
   #############################################################################

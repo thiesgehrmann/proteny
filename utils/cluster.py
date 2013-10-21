@@ -202,14 +202,13 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
        hits:   The indexed hits
        chrs_a: The output of prep_exon_list() for organism 0
        chrs_b: The output of prep_exon_list() for organism 1
-       D:      The depth to cut at.
+       H:      The height to cut at.
      Outputs: 
        C: A list of clusters of the form (L, score) where L is a list of hits in the cluster, and score is the score associated with that cluster
   """
 
   istack = [ -1 ];
   C = [];
-  D = {};
 
   while len(istack) > 0:
 
@@ -236,17 +235,20 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
 
 ###############################################################################
 
-def calc_clusters(T, hits, chrs_a, chrs_b, t=None):
+def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05):
 
   C = [];
 
   dsize = lambda d: sum([ len(d[k]) for k in d]);
   nd = null.cluster_null_clt([ h[13] for h in hits], dsize(chrs_a), dsize(chrs_b));
 
+  tests = sum([len(T[k]) for k in T]);
+
+  #alpha = alpha / float(tests);
   for k in T.keys():
     t = T[k];
 
-    c = cut_dendrogram(t, hits, chrs_a, chrs_b, nd);
+    c = cut_dendrogram(t, hits, chrs_a, chrs_b, nd, alpha / float(len(t)));
 
     C = C + c;
   #efor
@@ -257,7 +259,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, t=None):
 
 ###############################################################################    
 
-def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, t=0.05):
+def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, alpha):
   """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
    Inputs
        T       The linkage tree
@@ -269,8 +271,7 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, t=0.05):
   """
 
   istack = [ -1 ];
-  C = [];
-  D = {};
+  C      = [];
 
   while len(istack) > 0:
 
@@ -280,10 +281,9 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, t=0.05):
     score, exc_a, exc_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
 
     p = nd.pvalue(exc_a, exc_b, score);
-    print '%2.10f %10d %10d %2.10f' % (p, exc_a, exc_b, score);
-    if p < 0.05:
-      cdesc = clust_description(hits, ids, score, p);
-      C.append(cdesc);
+    if p < alpha:
+     cdesc = clust_description(hits, ids, score, p);
+     C.append(cdesc);
     else:
       if not(I is None):
         istack.append(I);
@@ -292,7 +292,7 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, t=0.05):
         istack.append(J);
       #fi
     #fi
-  #efor
+  #ewhile
 
   return C;
 #edef

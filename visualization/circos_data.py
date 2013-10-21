@@ -23,19 +23,19 @@ def write_clusts(PR, k, dir, chr_colors):
   i = k['id_a'];
   j = k['id_b'];
 
-  C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['CS'])];
+  C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])];
 
   color_org = (PR.org_names[i], 0) if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 3);
   color = lambda h: chr_colors[color_org[0]][h[color_org[1]]];
 
-  filename = '%s/clusters_%s_%s_%d_%s_%d_subset.tsv' % (dir, PR.org_names[i], PR.org_names[j], k['WS'], k['linkage_type'], k['CS']);
+  filename = '%s/clusters_%s_%s_%s_%f.tsv' % (dir, PR.org_names[i], PR.org_names[j], k['linkage_type'], k['alpha']);
   fnames.append(filename);
   fd = open(filename, 'w');
-  for (i, c) in enumerate(C):
+  for (k, c) in enumerate(C):
     # 0      1        2      3      4        5      6       7      8        9
     #(a_chr, a_start, a_end, b_chr, b_start, b_end, n_hits, score, prots_a, prots_b)
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], i, PR.org_names[i], h[0], h[2], h[3], h[7], h[6], h[8], ';'.join(['%s' % id for id in h[9]]), color(h)));
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], i, PR.org_names[j], h[3], h[4], h[5], h[7], h[6], h[8], ';'.join(['%s' % id for id in h[10]]), color(h)));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], c[0], c[1], c[2], c[7], c[6], c[8], ';'.join(['%d' % id for id in c[9]]), color(c)));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], c[3], c[4], c[5], c[7], c[6], c[8], ';'.join(['%d' % id for id in c[10]]), color(c)));
   #efor
   fd.close();
 
