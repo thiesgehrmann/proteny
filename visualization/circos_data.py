@@ -34,8 +34,8 @@ def write_clusts(PR, k, dir, chr_colors):
   for (k, c) in enumerate(C):
     # 0      1        2      3      4        5      6       7      8        9
     #(a_chr, a_start, a_end, b_chr, b_start, b_end, n_hits, score, prots_a, prots_b)
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], c[0], c[1], c[2], c[7], c[6], c[8], ';'.join(['%d' % id for id in c[9]]), color(c)));
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], c[3], c[4], c[5], c[7], c[6], c[8], ';'.join(['%d' % id for id in c[10]]), color(c)));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], c[0], c[1], c[2], c[6], c[7], c[8], ';'.join([str(id) for id in c[9]]), color(c)));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], c[3], c[4], c[5], c[6], c[7], c[8], ';'.join([str(id) for id in c[10]]), color(c)));
   #efor
   fd.close();
 

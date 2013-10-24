@@ -1,6 +1,7 @@
 from ibidas import *;
 
 import numpy as np;
+import bisect;
 
 ###############################################################################
 
@@ -33,18 +34,18 @@ def chr_pair_group(hits):
 ###############################################################################
 
 def prep_exon_list(E):
-  L = zip(*E.Get(_.chrid, _.start)());
+  L = zip(*E.Get(_.chrid, _.start, _.transcriptid, _.exonid)());
 
-  chrs = {};
-  for (chrid, start) in L:
+  chrs   = {};
+  for (chrid, start, transcriptid, exonid) in L:
     if chrid not in chrs:
-      chrs[chrid] = [];
+      chrs[chrid]   = [];
     #fi
-    chrs[chrid].append(start);
+    chrs[chrid].append((start,transcriptid,exonid));
   #efor
 
   for chrid in chrs.keys():
-    chrs[chrid].sort();
+    chrs[chrid].sort(key=lambda x: x[0]);
   #efor
 
   return chrs;
@@ -52,12 +53,14 @@ def prep_exon_list(E):
 
 ###############################################################################
 
-def count_exons_in_reg(chrs, chrid, start, end):
-  L = chrs[chrid];
+def exons_in_reg(chrs, chrid, start, end):
+  E = chrs[chrid];
+  L = [ x[0] for x in E ];
   i = bisect.bisect_right(L, start);
   j = bisect.bisect_left(L, end);
 
-  return j - i + 1;
+  return [ (k[1], k[2]) for k in E[i-1:j] ];
+
 #edef
 
 ###############################################################################
@@ -70,7 +73,7 @@ def reindex_blast(br):
           _.b_chrid, _.b_geneid, _.b_exonid
           _.a_start, _.a_end
           _.b_start, _.b_end
-          _.pident, _.evalue, _.bitscore
+          _.coverage, _.pident, _.evalue, _.bitscore
 
       Output:
         B: A Rep of blast results with an index
@@ -85,11 +88,12 @@ def reindex_blast(br):
              _.a_end,                           \
              _.b_start,                         \
              _.b_end,                           \
+             _.coverage,                        \
              _.pident,                          \
              _.evalue,                          \
              _.bitscore);
   F = Rep(zip(ind, *F()))
-  F = F / ('i', 'a_chrid', 'a_geneid', 'a_exonid', 'b_chrid', 'b_geneid', 'b_exonid', 'a_start', 'a_end', 'b_start', 'b_end', 'pident', 'evalue', 'bitscore');
+  F = F / ('i', 'a_chrid', 'a_geneid', 'a_exonid', 'b_chrid', 'b_geneid', 'b_exonid', 'a_start', 'a_end', 'b_start', 'b_end', 'coverage', 'pident', 'evalue', 'bitscore');
 
   return F.Copy();
 #edef

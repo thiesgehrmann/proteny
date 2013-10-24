@@ -68,7 +68,7 @@ for reg in regions:
 # Visualize relationships between chromosomes
 agabichrs = ["agabi_scaffold_%d" % (i+1) for i in xrange(21) ];
 for i in xrange(36):
-  cc.circos_chr(files, agabichrs + ["schco2_scaffold_%d" % (i+1)], ["schco2_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%d" % (i+1) );
+  cc.circos_chr(files, agabichrs + ["schco2_scaffold_%d" % (i+1)], ["schco2_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%02d" % (i+1) );
 #efor
 
 #efor

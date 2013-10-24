@@ -13,47 +13,12 @@ reload(null);
 import util as util;
 reload(util);
 
-###############################################################################
-
-def prep_exon_list(E):
-  L = zip(*E.Get(_.chrid, _.start)());
-
-  chrs = {};
-  for (chrid, start) in L:
-    if chrid not in chrs:
-      chrs[chrid] = [];
-    #fi
-    chrs[chrid].append(start);
-  #efor
-
-  for chrid in chrs.keys():
-    chrs[chrid].sort();
-  #efor
-
-  return chrs;
-#edef
+from ibidas.utils.util import debug_here;
 
 ###############################################################################
 
-def count_exons_in_reg(chrs, chrid, start, end):
-  L = chrs[chrid];
-  i = bisect.bisect_right(L, start);
-  j = bisect.bisect_left(L, end);
-
-  return j - i + 1;
-#edef
-
-###############################################################################
-
-def test_score(PR, k, reg):
-  H, O, scores = PR.hit_windows[(k['id_a'], k['id_b'], k['WS'])];
-
-  chrs_a = prep_exon_list(PR.org_exons[k['id_a']]);
-  chrs_b = prep_exon_list(PR.org_exons[k['id_b']]);
-
-  for (gen, r) in zip([chrs_a, chrs_b], reg[1]):
-    print count_exons_in_reg(gen, r[1], r[2], r[3]);
-  #efor
+def null_dist(dist=null.cluster_null_clt, **kwargs):
+    return dist(**kwargs);
 #edef
 
 ###############################################################################
@@ -133,7 +98,7 @@ def construct_dendrogram(Z, HC):
 
 ###############################################################################
 
-def score_dendrogram_node(T, n, hits, chrs_a, chrs_b):
+def score_dendrogram_node(T, n, hits, chrs_a, chrs_b, hitA, hitB):
   """score = score_dendrogram_node(T, r, H, O, chrs_a, chrs_b)
      Inputs:
        T       The linkage tree
@@ -147,31 +112,30 @@ def score_dendrogram_node(T, n, hits, chrs_a, chrs_b):
   """
 
   I, J, dist, ids = T[n];
-  hits = [ hits[i] for i in ids ];
-#  hit_ex_a = [ (h[2], h[3]) for h in hits ];
-#  hit_ex_b = [ (h[5], h[6]) for h in hits ];
+  H = [ hits[i] for i in ids ];
+  hit_ex_a = [ (h[2], h[3]) for h in H ];
+  hit_ex_b = [ (h[5], h[6]) for h in H ];
 
-  start_a = min([ h[7] for h in hits]);
-  end_a   = max([ h[8] for h in hits]);
+  start_a = min([ h[7] for h in H]);
+  end_a   = max([ h[8] for h in H]);
 
-  start_b = min([ h[9]  for h in hits]);
-  end_b   = max([ h[10] for h in hits]);
+  start_b = min([ h[9]  for h in H]);
+  end_b   = max([ h[10] for h in H]);
 
-  exc_a = count_exons_in_reg(chrs_a, h[1], start_a, end_a);
-  exc_b = count_exons_in_reg(chrs_b, h[4], start_b, end_b);
+  ex_a = util.exons_in_reg(chrs_a, h[1], start_a, end_a);
+  ex_b = util.exons_in_reg(chrs_b, h[4], start_b, end_b);
 
-    # How many exons are "extra", or unaccounted for?
-#  dex_a = exc_a - len(set(hit_ex_a));
-#  dex_b = exc_b - len(set(hit_ex_b));
+  UE_a = set(ex_a) - set(hit_ex_a);
+  UE_b = set(ex_b) - set(hit_ex_b);
 
-    # How many ends do we have in total?
-#  ends_a = len(hit_ex_a) + dex_a;
-#  ends_b = len(hit_ex_b) + dex_b;
+  SE_a = sum([hits[hitA[k]][11] for k in UE_a if k in hitA ]);
+  SE_b = sum([hits[hitB[k]][11] for k in UE_b if k in hitB ]);
 
-  bitscore_sum = sum([h[13] for h in hits]);
-#  score = bitscore_sum / (exc_a * exc_b);
+  score_sum = sum([h[11] for h in H]);
 
-  return (bitscore_sum, exc_a, exc_b);
+  score = 2*score_sum - SE_a - SE_b;
+
+  return (score, ex_a, ex_b, UE_a, UE_b);
 
 #edef
 
@@ -215,7 +179,7 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
     index = istack.pop();
 
     I, J, dist, ids     = T[index];
-    score, exc_a, exc_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
+    score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
 
     if dist <= H:
       cdesc = clust_description(hits, ids, score, 0);
@@ -235,20 +199,39 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
 
 ###############################################################################
 
-def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05):
+def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_score_shuff):
 
   C = [];
 
+  hitA = {};
+  hitB = {};
+  v     = [ (2,3,hitA), (5,6,hitB) ];
+
+  for (i, h) in enumerate(hits):
+    for (j, k, H) in v:
+      k = (h[j], h[k]);
+      if not(k in H):
+        H[k] = i;
+      elif h[11] > hits[H[k]]:
+         H[k] = i;
+      #fi
+    #efor
+  #efor
+
   dsize = lambda d: sum([ len(d[k]) for k in d]);
-  nd = null.cluster_null_clt([ h[13] for h in hits], dsize(chrs_a), dsize(chrs_b));
+  nd = null_dist(dist=dist, 
+                 scores=[ h[11] for h in hits], Ea=dsize(chrs_a), Eb=dsize(chrs_b));
+
 
   tests = sum([len(T[k]) for k in T]);
 
-  #alpha = alpha / float(tests);
-  for k in T.keys():
+  alpha = alpha / float(tests);
+  print "Calculating clusters, this will take some time, too";
+  for (i, k) in enumerate(T.keys()):
+    print '\r%d/%d' % (i, len(T.keys())), k,
     t = T[k];
 
-    c = cut_dendrogram(t, hits, chrs_a, chrs_b, nd, alpha / float(len(t)));
+    c = cut_dendrogram(t, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha);
 
     C = C + c;
   #efor
@@ -259,7 +242,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05):
 
 ###############################################################################    
 
-def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, alpha):
+def cut_dendrogram(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
   """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
    Inputs
        T       The linkage tree
@@ -278,10 +261,12 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, nd, alpha):
     index = istack.pop();
 
     I, J, dist, ids     = T[index];
-    score, exc_a, exc_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
+    score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b, hitA, hitB);
 
-    p = nd.pvalue(exc_a, exc_b, score);
+    p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue=len(ue_a) + len(ue_b));
+
     if p < alpha:
+     print (len(ids), len(ue_a) + len(ue_b), p);
      cdesc = clust_description(hits, ids, score, p);
      C.append(cdesc);
     else:
@@ -314,7 +299,7 @@ def distance(hits, i, j):
 
                 |-a-|
      ---=========---============---
-        \\\\\\\\\\  ||||||||||||
+       \\\\\\\\\\   ||||||||||||
      ----=========--============---
                  |-b|
 

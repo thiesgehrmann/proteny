@@ -29,6 +29,7 @@ class proteny:
   org_chrs    = [];
 
   blast_hits          = {};
+  hits                = {};
   hit_window_index    = None;
   hit_windows         = {};
   hit_distances       = {};
@@ -76,7 +77,7 @@ class proteny:
     k = self.hit_dendrogram(k);
 
       # Cut the dendrogram.
-    k = self.hit_cluster();
+    k = self.hit_cluster(k);
 
     return k;
   #edef
@@ -84,7 +85,7 @@ class proteny:
   ###############################################################################
 
   def key(self, k):
-    key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H' ];
+    key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H', 'alpha' ];
     nk        = dict([ (f, None) for f in key_elems]);
 
     for (i,v) in enumerate(k):
@@ -180,7 +181,7 @@ class proteny:
 
     dna = dict(zip(*genome()));
 
-    cc = dict([(c, 0) for c in seq.codons]);
+    cc = dict([(c, 0) for c in sequtils.codons]);
     total = 0;
 
     exons = [];
@@ -213,7 +214,7 @@ class proteny:
   __blast_slice_names__ = ('a_chrid', 'a_strand', 'a_geneid', 'a_transcriptid', 'a_exonid', \
                            'b_chrid', 'b_strand', 'b_geneid', 'b_transcriptid', 'b_exonid', \
                            'a_start', 'a_end', 'b_start', 'b_end',                          \
-                           'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
+                           'coverage', 'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
 
   def blast(self, id_a = 0, id_b=1):
     if len(self.org_names) < 2:
@@ -240,6 +241,7 @@ class proteny:
               (_.a_start + (_.qend * 3 )),                           \
               (_.b_start + (_.sstart * 3 )),                         \
               (_.b_start + (_.send * 3 )),                           \
+              ((_.qend.Cast(float) - _.qstart + 1) * 3 + (_.send.Cast(float) - _.sstart + 1) * 3) / ((_.qlen.Cast(float) + _.slen) * 3), \
               _.pident,                                              \
               _.mismatch,                                            \
               _.gapopen,                                             \
@@ -268,7 +270,7 @@ class proteny:
       BR = self.blast_hits[(k['id_a'], k['id_b'])];
       F  = util.reindex_blast(BR);
 
-      hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.pident, _.evalue, _.bitscore);
+      hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.coverage, _.pident, _.evalue, _.bitscore);
       BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
       BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
 
