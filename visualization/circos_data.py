@@ -62,18 +62,18 @@ def write_blast(PR, k, dir, chr_colors):
 
   H = zip(*F());
   for (hitid, hit) in enumerate(H):
-    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\ta_strand=%s,pident=%f,evalue=%f,bitscore=%f,a_geneid=%s,a_transcriptid=%s,a_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
+    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\ta_strand=%s,coverage=%f,score=%f,pident=%f,evalue=%f,bitscore=%f,a_geneid=%s,a_transcriptid=%s,a_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
       % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[i], hit[D['a_chrid']], \
          hit[D['a_start']], hit[D['a_end']], \
          ('p' if (hit[D['a_strand']]) == '+' else 'n'), \
-         hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
+         hit[D['coverage']], hit[D['score']], hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
          str(hit[D['a_geneid']]), str(hit[D['a_transcriptid']]), hit[D['a_exonid']], \
          color(hit), hit[D['bitscore']]));
-    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\tb_strand=%s,pident=%f,evalue=%f,bitscore=%f,b_geneid=%s,b_transcriptid=%s,b_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
+    fd.write('blasthit_%s_%s_%010d\t%s_%s\t%d\t%d\tb_strand=%s,coverage=%f,score=%f,pident=%f,evalue=%f,bitscore=%f,b_geneid=%s,b_transcriptid=%s,b_exonid=%d,h=%d,s=%0.3f,v=1.0\n' \
       % (PR.org_names[i], PR.org_names[j], hitid, PR.org_names[j], hit[D['b_chrid']], \
          hit[D['b_start']], hit[D['b_end']], \
          ('p' if (hit[D['b_strand']]) == '+' else 'n'), \
-         hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
+         hit[D['coverage']], hit[D['score']], hit[D['pident']], hit[D['evalue']], hit[D['bitscore']], \
          str(hit[D['b_geneid']]), str(hit[D['b_transcriptid']]), hit[D['b_exonid']], \
          color(hit), hit[D['bitscore']]));
   #efor

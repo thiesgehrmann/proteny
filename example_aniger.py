@@ -47,6 +47,17 @@ PR.save(savename);
   # Export data into a CIRCOS format
 files = cdata.write_data(PR, k, '%s/data' % circdir);
 
+           #('bri1',   [ ('schco2', 'scaffold_1',    5346259, 5348750), ('agabi', 'scaffold_1',  1865954, 1869064) ] ),
+regions = [ ('strange',[ ('aniger_n402',   'ACJE01000001',  436263,  466251),
+                         ('aniger_513_88', 'An01',         1618193, 1644408),
+                         ('aniger_513_88', 'An11',         1443277, 1470326) ]) ];
+
+  # Visualize a region
+for reg in regions:
+  cr.circos_region(files, reg, 30000, circdir, ('aniger_reg_%s' % reg[0]));
+#efor
+
+
   # Visualize relationships between chromosomes
 anchrs = [ "aniger_513_88_An%02d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
 for i in xrange(an1[2].Shape()()):

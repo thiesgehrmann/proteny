@@ -214,7 +214,7 @@ class proteny:
   __blast_slice_names__ = ('a_chrid', 'a_strand', 'a_geneid', 'a_transcriptid', 'a_exonid', \
                            'b_chrid', 'b_strand', 'b_geneid', 'b_transcriptid', 'b_exonid', \
                            'a_start', 'a_end', 'b_start', 'b_end',                          \
-                           'coverage', 'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
+                           'coverage', 'score', 'pident', 'mismatch', 'gapopen', 'evalue', 'bitscore');
 
   def blast(self, id_a = 0, id_b=1):
     if len(self.org_names) < 2:
@@ -242,6 +242,7 @@ class proteny:
               (_.b_start + (_.sstart * 3 )),                         \
               (_.b_start + (_.send * 3 )),                           \
               ((_.qend.Cast(float) - _.qstart + 1) * 3 + (_.send.Cast(float) - _.sstart + 1) * 3) / ((_.qlen.Cast(float) + _.slen) * 3), \
+              ((_.qend.Cast(float) - _.qstart + 1) * 3 + (_.send.Cast(float) - _.sstart + 1) * 3) / ((_.qlen.Cast(float) + _.slen) * 3) * _.evalue.Each(lambda x: 1.0 - min(1.0,x)), \
               _.pident,                                              \
               _.mismatch,                                            \
               _.gapopen,                                             \
@@ -401,6 +402,86 @@ class proteny:
     self.hit_clusters_height[(k['id_a'], k['id_b'], k['linkage_type'], k['H'])] = C;
     
     return k;
+  #edef
+
+  #############################################################################
+
+  def hit_cluster_overlap(self, k):
+    """ Identify clusters which are overlapped"""
+
+    if ((k['id_a'], k['id_b'], k['linkage_type'], k['alpha']) not in self.hit_clusters):
+      print "You must run hit_cluster() first!";
+      return None;
+    #fi
+
+    C = self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])];
+
+    overlaps = [];
+    R        = [];
+
+    for i in xrange(len(C)-1):
+      ci  = C[i];
+      cio = [];
+      for j in xrange(i+1, len(C)):
+        cj = C[j];
+        rlen = float(ci[2] - ci[1] + 1) / float(cj[2] - ci[1] + 1);
+        if ((ci[0] == cj[0]) and
+            util.overlap( (ci[1], ci[2]), (cj[1], cj[2])) > 0 and
+            (rlen > 0.8 or rlen < 1.25)):
+          cio.append(j);
+        #fi
+      #efor
+      if len(cio) > 0:
+        overlaps.append(cio + [i]);
+      #fi
+    #efor
+
+    for (j, cio) in enumerate(overlaps):
+      areg_chr   = C[cio[0]][0];
+      areg_start = min([ C[i][1] for i in cio ]);
+      areg_end   = max([ C[i][2] for i in cio ]);
+      areg       = ( self.org_names[k['id_a']], areg_chr, areg_start, areg_end );
+
+      bregs      = [ ( self.org_names[k['id_b']], C[i][3], C[i][4], C[i][5] ) for i in cio ];
+      regs       = [ areg ] + bregs;
+      R.append( ( str(j), regs));
+    #efor
+
+    return R;
+
+   #efor
+
+  #############################################################################
+
+  def hit_clusters_containing(self, k, a_prots, b_prots):
+
+
+    C  = self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])];
+    CA = [];
+    CB = [];
+
+    for ap in a_prots:
+      CA.append([ i for (i,c) in enumerate(C) if ap in c[9] ]);
+    #efor
+    for bp in b_prots:
+      CB.append([ i for (i,c) in enumerate(C) if bp in c[10] ]);
+    #efor
+
+    return (CA, CB);
+  #edef
+
+  #############################################################################
+
+  def hit_clust_2_reg(self, k, ci, name=None):
+    C  = self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])][ci];
+
+    #('bri1',   [ ('schco2', 'scaffold_1',  5346259, 5348750), ('agabi', 'scaffold_1',  1865954, 1869064) ] ),
+
+    reg = (name if not(name == None) else str(ci),
+           [ ( self.org_names[k['id_a']], C[0], C[1], C[2] ),
+             ( self.org_names[k['id_b']], C[3], C[4], C[5] ) ] );
+
+    return reg;
   #edef
 
   #############################################################################

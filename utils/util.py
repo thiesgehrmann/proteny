@@ -89,11 +89,12 @@ def reindex_blast(br):
              _.b_start,                         \
              _.b_end,                           \
              _.coverage,                        \
+             _.score,                           \
              _.pident,                          \
              _.evalue,                          \
              _.bitscore);
   F = Rep(zip(ind, *F()))
-  F = F / ('i', 'a_chrid', 'a_geneid', 'a_exonid', 'b_chrid', 'b_geneid', 'b_exonid', 'a_start', 'a_end', 'b_start', 'b_end', 'coverage', 'pident', 'evalue', 'bitscore');
+  F = F / ('i', 'a_chrid', 'a_geneid', 'a_exonid', 'b_chrid', 'b_geneid', 'b_exonid', 'a_start', 'a_end', 'b_start', 'b_end', 'coverage', 'score', 'pident', 'evalue', 'bitscore');
 
   return F.Copy();
 #edef

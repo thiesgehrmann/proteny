@@ -62,7 +62,7 @@ files = cdata.write_data(PR, k, '%s/data' % circdir);
 
   # Visualize a region
 for reg in regions:
-  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg_%d' % (j)) + reg[0]);
+  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg') + reg[0]);
 #efor
 
 # Visualize relationships between chromosomes

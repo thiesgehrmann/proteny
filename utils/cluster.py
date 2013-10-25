@@ -128,10 +128,10 @@ def score_dendrogram_node(T, n, hits, chrs_a, chrs_b, hitA, hitB):
   UE_a = set(ex_a) - set(hit_ex_a);
   UE_b = set(ex_b) - set(hit_ex_b);
 
-  SE_a = sum([hits[hitA[k]][11] for k in UE_a if k in hitA ]);
-  SE_b = sum([hits[hitB[k]][11] for k in UE_b if k in hitB ]);
+  SE_a = sum([hits[hitA[k]][12] for k in UE_a if k in hitA ]);
+  SE_b = sum([hits[hitB[k]][12] for k in UE_b if k in hitB ]);
 
-  score_sum = sum([h[11] for h in H]);
+  score_sum = sum([h[12] for h in H]);
 
   score = 2*score_sum - SE_a - SE_b;
 
@@ -212,7 +212,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_sc
       k = (h[j], h[k]);
       if not(k in H):
         H[k] = i;
-      elif h[11] > hits[H[k]]:
+      elif h[12] > hits[H[k]]:
          H[k] = i;
       #fi
     #efor
@@ -220,7 +220,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_sc
 
   dsize = lambda d: sum([ len(d[k]) for k in d]);
   nd = null_dist(dist=dist, 
-                 scores=[ h[11] for h in hits], Ea=dsize(chrs_a), Eb=dsize(chrs_b));
+                 scores=[ h[12] for h in hits], Ea=dsize(chrs_a), Eb=dsize(chrs_b));
 
 
   tests = sum([len(T[k]) for k in T]);
@@ -394,3 +394,4 @@ def clust_description(hits, C, score, p):
 #edef
 
 ###############################################################################
+
