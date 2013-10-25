@@ -7,7 +7,7 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
-import proteny as pp;
+import proteny as ps;
 import data;
 import threshold as tr;
 
@@ -25,7 +25,7 @@ sc = data.example(data.schco2, 'scaffold_1');
 ag = data.example(data.agabi, 'scaffold_2');
 
   # Prepare the protenty analysis
-PR = pp.proteny();
+PR = ps.proteny();
 
   # Add our organisms.
 id_a = PR.add_org(*sc, isfile=False);

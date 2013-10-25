@@ -7,7 +7,7 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
-import proteny as pp;
+import proteny as ps;
 import data;
 
 ###############################################################################
@@ -24,7 +24,7 @@ an1 = data.aniger_n402();
 an2 = data.aniger_513_88();
 
   # Prepare the protenty analysis
-PR = pp.proteny();
+PR = ps.proteny();
 
   # Add our organisms.
 id_a = PR.add_org(*an1, isfile=False);

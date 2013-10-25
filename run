@@ -4,7 +4,7 @@ CIRCOS='/home/thiesgehrmann/src/circos-0.64/bin/circos'
 d=`date "+%F-%R"`;
 
 for conf in $(ls './' | grep '.conf$'); do
-  echo $conf;
+  echo ${conf}.${d};
   $CIRCOS -conf $conf -debug_group summary,timer > run.out;
   cp circos.png ${conf}.${d}.png;
   cp circos.svg ${conf}.${d}.svg;

@@ -7,7 +7,7 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
-import proteny as pp;
+import proteny as ps;
 import data;
 
 ###############################################################################
@@ -26,7 +26,7 @@ human = data.example(data.human, '12')
 mouse = data.example(data.mouse, '6')
 
   # Prepare the protenty analysis
-PR = pp.proteny();
+PR = ps.proteny();
 
   # Add our organisms.
 id_a = PR.add_org(*human, isfile=False);

@@ -57,6 +57,16 @@ regions = \
       ('wc2',    [ ('schco2', 'scaffold_2',  844864,  846181 ), ('agabi', 'scaffold_2',  875026,  876315 ) ] ),
       ('random', [ ('schco2', 'scaffold_5',  2483079, 2483664), ('agabi', 'scaffold_8',  177699,  179015 ) ] ) ];
 
+interesting_genes = [ ( 'bri1', 255701 ), 
+                      ( 'c2h2', 114363 ),
+                      ( 'fst3', 257422),
+                      ( 'fst4', 66861),
+                      ( 'gat1', 255004),
+                      ( 'hom1', 257652),
+                      ( 'hom2', 1034289),
+                      ( 'wc1',  78657),
+                      ( 'wc2',  13988) ]
+
   # Export data into a CIRCOS format
 files = cdata.write_data(PR, k, '%s/data' % circdir);
 
