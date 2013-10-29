@@ -222,18 +222,17 @@ class proteny:
       return None;
     #fi
 
-    a_exons = self.org_exons[id_a][_.end - _.start > 60] / tuple([ 'a_' + s for s in self.__exon_slice_names__]);
+    a_exons = self.org_exons[id_a];
+    a_exons = a_exons / tuple([ 'a_' + s for s in self.__exon_slice_names__]);
     a_exons = a_exons.To(_.a_sequence, Do=_.ReplaceMissing());
-    b_exons = self.org_exons[id_b][_.end - _.start > 60] / tuple([ 'b_' + s for s in self.__exon_slice_names__]);
+
+    b_exons = self.org_exons[id_b];
+    b_exons = b_exons / tuple([ 'b_' + s for s in self.__exon_slice_names__]);
     b_exons = b_exons.To(_.b_sequence, Do=_.ReplaceMissing());
     
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
-    R = a_exons | Blast(normalize=True, folder='./blast_runs/') | b_exons
+    R = a_exons | Blast(reciprocal=False, folder='./blast_runs/') | b_exons
     R = R.Copy();
-    #filename = 'results.%s.%s.blast' % (self.org_names[id_a], self.org_names[id_b]);
-    #self.blast_results.append((id_a, id_b, filename));
-    #Save(R, filename);
-    #R = Load(filename);
     
     F = R.Get(_.a_chrid, _.a_strand, _.a_geneid, _.a_transcriptid, _.a_exonid, \
               _.b_chrid, _.b_strand, _.b_geneid, _.b_transcriptid, _.b_exonid, \

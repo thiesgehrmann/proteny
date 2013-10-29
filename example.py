@@ -7,12 +7,12 @@ sys.path.append('visualization');
 import circos_data as cdata;
 import circos_region as cr;
 import circos_chr    as cc;
-import proteny as pp;
+import proteny as ps;
 import data;
 
 ###############################################################################
 
-savename = 'PR_schco_agabi.proteny';
+savename = 'PR_schco_agabi_all_exons.proteny';
 circdir  = 'circos';
 
 ###############################################################################
@@ -24,7 +24,7 @@ sc = data.schco2();
 ag = data.agabi();
 
   # Prepare the protenty analysis
-PR = pp.proteny();
+PR = ps.proteny();
 
   # Add our organisms.
 id_a = PR.add_org(*sc, isfile=False);
@@ -72,7 +72,7 @@ files = cdata.write_data(PR, k, '%s/data' % circdir);
 
   # Visualize a region
 for reg in regions:
-  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg') + reg[0]);
+  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg_') + reg[0]);
 #efor
 
 # Visualize relationships between chromosomes
