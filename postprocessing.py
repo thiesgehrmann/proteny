@@ -4,6 +4,9 @@ sys.path.append('./utils');
 import proteny as ps;
 import util;
 
+from scipy.cluster import hierarchy;
+import numpy as np;
+
 ###############################################################################
 
 def overlap_clusters(C):

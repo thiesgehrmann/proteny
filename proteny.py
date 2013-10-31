@@ -231,7 +231,7 @@ class proteny:
     b_exons = b_exons.To(_.b_sequence, Do=_.ReplaceMissing());
     
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
-    R = a_exons | Blast(reciprocal=False, folder='./blast_runs/') | b_exons
+    R = a_exons | Blast(reciprocal=True, folder='./blast_runs/') | b_exons
     R = R.Copy();
     
     F = R.Get(_.a_chrid, _.a_strand, _.a_geneid, _.a_transcriptid, _.a_exonid, \

@@ -229,9 +229,10 @@ def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_sc
   print "Calculating clusters, this will take some time, too";
   for (i, k) in enumerate(T.keys()):
     print '\r%d/%d' % (i, len(T.keys())), k,
+    sys.stdout.flush();
     t = T[k];
 
-    c = cut_dendrogram(t, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha);
+    c = cut_dendrogram_max(t, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha);
 
     C = C + c;
   #efor
@@ -281,7 +282,83 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
 
   return C;
 #edef
-  
+
+###############################################################################
+
+def pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd):
+  if (index is None):
+    return (None, None, None, None, None, 1.0);
+  #fi
+
+  I, J, dist, ids               = T[index];
+  score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b, hitA, hitB);
+
+  p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue=len(ue_a) + len(ue_b));
+
+  return (score, ex_a, ex_b, ue_a, ue_b, p);
+#edef
+
+###############################################################################
+
+def cut_dendrogram_max(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
+  """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
+   Inputs
+       T       The linkage tree
+       hits:   The indexed hits
+       chrs_a: The output of prep_exon_list() for organism 0
+       chrs_b: The output of prep_exon_list() for organism 1
+     Outputs: 
+       C: A list of clusters of the form (L, score) where L is a list of hits in the cluster, and score is the score associated with that cluster
+  """
+
+  istack = [ -1 ];
+  sp     = [ None for i in xrange(len(T)) ];
+  C      = [];
+
+  while len(istack) > 0:
+    accept = False;
+    index  = istack.pop();
+
+    I, J, dist, ids = T[index];
+    if sp[index] == None:
+      sp[index] = pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd);
+    #fi
+    score, ex_a, ex_b, ue_a, ue_b, p = sp[index];
+
+    if p < alpha:
+      print "Good enough!"; sys.stdout.flush();
+      accept = True;
+    #fi
+
+    if not(I == None) and not(J == None):
+
+      sp[I] = pi(T, I, hits, chrs_a, chrs_b, hitA, hitB, nd);
+      sp[J] = pi(T, J, hits, chrs_a, chrs_b, hitA, hitB, nd);
+
+      if (p >= alpha):
+        istack.append(I);
+        istack.append(J);
+      else:
+        if (sp[I][5] < p):
+          accept = False;
+          istack.append(I);
+        #fi
+        if (sp[J][5] < p):
+          accept = False;
+          istack.append(J);
+        #fi
+      #fi
+    #fi
+
+    if accept == True:
+      print (len(ids), len(ue_a) + len(ue_b), p); sys.stdout.flush()
+      cdesc = clust_description(hits, ids, score, p);
+      C.append(cdesc);
+    #fi
+  #ewhile
+
+  return C;
+#edef
 
 ###############################################################################
 
