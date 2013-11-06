@@ -17,7 +17,7 @@ from ibidas.utils.util import debug_here;
 
 ###############################################################################
 
-def null_dist(dist=null.cluster_null_clt, **kwargs):
+def null_dist(dist=null.cluster_null_score_shuff, **kwargs):
     return dist(**kwargs);
 #edef
 
@@ -199,7 +199,7 @@ def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
 
 ###############################################################################
 
-def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_score_shuff):
+def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_score_shuff_max):
 
   C = [];
 
@@ -220,7 +220,8 @@ def calc_clusters(T, hits, chrs_a, chrs_b, alpha=0.05, dist=null.cluster_null_sc
 
   dsize = lambda d: sum([ len(d[k]) for k in d]);
   nd = null_dist(dist=dist, 
-                 scores=[ h[12] for h in hits], Ea=dsize(chrs_a), Eb=dsize(chrs_b));
+                 scores=[ h[12] for h in hits], Ea=dsize(chrs_a), Eb=dsize(chrs_b),
+                 hits=hits, hitA=hitA, hitB=hitB);
 
 
   tests = sum([len(T[k]) for k in T]);
@@ -264,7 +265,7 @@ def cut_dendrogram(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
     I, J, dist, ids     = T[index];
     score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b, hitA, hitB);
 
-    p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue=len(ue_a) + len(ue_b));
+    p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue_a=len(ue_a), nue_b=len(ue_b));
 
     if p < alpha:
      print (len(ids), len(ue_a) + len(ue_b), p);
@@ -293,7 +294,7 @@ def pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd):
   I, J, dist, ids               = T[index];
   score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b, hitA, hitB);
 
-  p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue=len(ue_a) + len(ue_b));
+  p = nd.pvalue(Ea=len(ex_a), Eb=len(ex_b), score=score, n=len(ids), nue_a=len(ue_a), nue_b=len(ue_b));
 
   return (score, ex_a, ex_b, ue_a, ue_b, p);
 #edef

@@ -13,6 +13,8 @@ import cluster as cluster;
 reload(cluster);
 import util as util;
 reload(util);
+import cluster_null as null;
+reload(null);
 
 from ibidas.utils.util import debug_here;
 
@@ -353,7 +355,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05):
+  def hit_cluster(self, k, alpha=0.05, nd=null.cluster_null_score_shuff_max):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \
@@ -363,6 +365,7 @@ class proteny:
     #fi
 
     k['alpha'] = alpha;
+    k['nd']    = nd.name;
 
     hits  = self.hits[(k['id_a'], k['id_b'])];
     T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
@@ -370,7 +373,7 @@ class proteny:
     chrs_a = self.org_chrs[k['id_a']];
     chrs_b = self.org_chrs[k['id_b']];
 
-    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, alpha=alpha);
+    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, alpha=alpha, dist=nd);
 
     self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])] = C;
 

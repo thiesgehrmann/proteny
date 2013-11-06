@@ -70,9 +70,28 @@ interesting_genes = [ ( 'bri1', 255701 ),
   # Export data into a CIRCOS format
 files = cdata.write_data(PR, k, '%s/data' % circdir);
 
+  # Clusters containing our genes.
+fc = pp.hit_clusters_containing(PR, k, [ j[1] for j in interesting_genes ], [])[0];
+for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
+  for r in rs:
+    reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
+    cr.circos_region(files, region, 0, circdir, 'schco2_reg_discovered_' + reg[0]);
+  #efor
+#efor
+
+  # Overlapping clusters
+IR = pp.hit_cluster_overlap(PR, k);
+IR = sorted(IR, key=lambda x: len(x[1]));
+IR = [ IR[-1] ];
+
+for reg in IR:
+  cr.circos_region(files, reg, 100, circdir, ('schco2_reg_overlapping') + reg[0]);
+#efor
+
+
   # Visualize a region
 for reg in regions:
-  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg__') + reg[0]);
+  cr.circos_region(files, reg, 30000, circdir, ('schco2_reg_known') + reg[0]);
 #efor
 
 # Visualize relationships between chromosomes

@@ -170,11 +170,6 @@ chromosomes                 = %s
     ribbon        = yes
     
     <rules>
-      flow = continue
-      <rule>
-        condition = var(evalue) > 0.00001
-        show      = no
-      </rule>
       <rule>
         condition = 1
         color     = eval(sprintf("hsv(%d,%f,%f)", var(h), var(score), var(v) ))
