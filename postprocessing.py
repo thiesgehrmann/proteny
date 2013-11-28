@@ -57,11 +57,11 @@ def overlap_clusters2(C):
           # add it to the overlap region
         if (((cj[0] == ck[0]) and
              util.overlap( (cj[1], cj[2]), (ck[1], ck[2])) > 0 and
-             (len1 > 0.8 and len1 < 1.25))
+             (len1 > 0.3 and len1 < 3))
             or
             ((cj[3] == ck[3]) and
              util.overlap( (cj[4], cj[5]), (ck[4], ck[5])) > 0 and
-             (len2 > 0.8 and len2 < 1.25))):
+             (len2 > 0.3 and len2 < 3))):
           K.append(cj);
           break;
         #fi
@@ -108,7 +108,7 @@ def overlap_clusters2(C):
     # Remove duplicates among overlaps (check for subsets)
   for i in xrange(len(OR)-1):
     for j in xrange(i+1, len(OR)):
-      if np.mean([ 1 if (k in OR[i]) else 0 for k in OR[j]]) > 0.8:
+      if sum([ 1 for k in OR[j] if (k in OR[i]) ]) >= 0.8 * len(OR):
         if len(OR[i]) > len(OR[j]):
           OR[j] = [];
         else:
@@ -130,7 +130,7 @@ def hit_cluster_overlap2(PR, k):
   if ((k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd']) not in PR.hit_clusters):
     print "You must run hit_cluster() first!";
     return None;
-  fi
+  #fi
 
   C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd'])];
 

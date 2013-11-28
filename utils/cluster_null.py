@@ -82,12 +82,14 @@ class cluster_null_score_gentle:
   scores = None;
   perm   = {};
   nperm  = {};
+  factor = None;
 
   #############################################################################
 
   def __init__(self, **kwargs):
     self.scores = kwargs.pop('scores');
-    self.nperm  = kwargs.pop('nperm') if 'nperm' in kwargs else 20000;
+    self.nperm  = kwargs.pop('nperm')  if 'nperm'  in kwargs else 20000;
+    self.factor = kwargs.pop('factor') if 'factor' in kwargs else 1;
     perm        = {};
   #edef
 
@@ -100,7 +102,7 @@ class cluster_null_score_gentle:
       S = [ 0 ] * self.nperm;
       for i in xrange(self.nperm):
         s = random.sample(self.scores, n);
-        S[i] = 2*sum(s[0:n]) - nue;
+        S[i] = 2*sum(s[0:n]) - (self.factor * nue);
       #efor
       self.perm[k] = sorted(S);
     #fi

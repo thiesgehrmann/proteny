@@ -102,7 +102,7 @@ class proteny:
     params = '%s_%s'    % (k['linkage_type'], str(k['H']));
     clust  = '%s_%s_%s' % (k['cut'], k['nd'], str(k['alpha']));
 
-    return '_'.join(names, params, clust);
+    return '_'.join([names, params, clust]);
   #edef
 
   ###############################################################################
