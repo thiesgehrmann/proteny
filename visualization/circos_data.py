@@ -23,12 +23,12 @@ def write_clusts(PR, k, dir, chr_colors):
   i = k['id_a'];
   j = k['id_b'];
 
-  C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])];
+  C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd'])];
 
   color_org = (PR.org_names[i], 0) if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 3);
   color = lambda h: chr_colors[color_org[0]][h[color_org[1]]];
 
-  filename = '%s/clusters_%s_%s_%s_%f.tsv' % (dir, PR.org_names[i], PR.org_names[j], k['linkage_type'], k['alpha']);
+  filename = '%s/clusters_%s.tsv' % (dir, PR.key_s(k));
   fnames.append(filename);
   fd = open(filename, 'w');
   for (k, c) in enumerate(C):

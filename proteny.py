@@ -85,15 +85,24 @@ class proteny:
   #edef
 
   ###############################################################################
-
+  key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H', 'alpha', 'nd', 'cut' ];
   def key(self, k):
-    key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H', 'alpha' ];
-    nk        = dict([ (f, None) for f in key_elems]);
+    nk        = dict([ (f, None) for f in self.key_elems]);
 
     for (i,v) in enumerate(k):
-      nk[key_elems[i]] = v;
+      nk[self.key_elems[i]] = v;
     #efor
     return nk;
+  #edef
+
+  ###############################################################################
+
+  def key_s(self, k):
+    names  = '%s_%s'    % (self.org_names[k['id_a']], self.org_names[k['id_b']]);
+    params = '%s_%s'    % (k['linkage_type'], str(k['H']));
+    clust  = '%s_%s_%s' % (k['cut'], k['nd'], str(k['alpha']));
+
+    return '_'.join(names, params, clust);
   #edef
 
   ###############################################################################
@@ -355,7 +364,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05, nd=null.cluster_null_score_shuff_max):
+  def hit_cluster(self, k, alpha=0.05, cut='greedy', nd=null.cluster_null_score_strict):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \
@@ -365,6 +374,7 @@ class proteny:
     #fi
 
     k['alpha'] = alpha;
+    k['cut']   = cut;
     k['nd']    = nd.name;
 
     hits  = self.hits[(k['id_a'], k['id_b'])];
@@ -373,9 +383,9 @@ class proteny:
     chrs_a = self.org_chrs[k['id_a']];
     chrs_b = self.org_chrs[k['id_b']];
 
-    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, alpha=alpha, dist=nd);
+    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, cut=cut, alpha=alpha, dist=nd);
 
-    self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'])] = C;
+    self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd'])] = C;
 
     return k;
   #edef

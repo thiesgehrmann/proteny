@@ -9,49 +9,62 @@ from ibidas.utils.util import debug_here;
 
 class cluster_null_clt:
 
-  name   = 'cluster_null_clt';
-  scores = None;
-  mu     = None;
-  s2     = None;
+  name   = 'ClusterNullCLT';
+  H_mu   = None;
+  H_s2   = None;
+  U1_mu  = None;
+  U1_s2  = None;
+  U2_mu  = None;
+  U2_s2  = None;
 
   #############################################################################
 
   def __init__(self, **kwargs):
-    self.scores = kwargs.pop('scores')
-    Ea          = kwargs.pop('Ea');
-    Eb          = kwargs.pop('Eb');
-    self.estmu(Ea, Eb);
-    self.ests2(Ea, Eb);
+    scores = kwargs.pop('scores');
+    hits   = kwargs.pop('hits');
+    hitA   = kwargs.pop('hitA');
+    hitB   = kwargs.pop('hitB');    
+
+    self.H_mu  = self.estmu(scores);
+    self.H_s2  = self.ests2(scores);
+
+    L          = [ hits[hitA[k]][12] for k in hitA.keys() ];
+    self.U1_mu = self.estmu(L);
+    self.U1_s2 = self.ests2(L);
+
+    L          = [ hits[hitB[k]][12] for k in hitB.keys() ];
+    self.U2_mu = self.estmu(L);
+    self.U2_s2 = self.ests2(L);
   #edef
 
   #############################################################################
 
-  def estmu(self, Ea, Eb):
-    n  = Ea * Eb;
-
-    self.mu = sum(self.scores) / n;
+  def estmu(self, L):
+    mu = np.mean(L);
+    return mu;
   #edef
 
   #############################################################################
 
-  def ests2(self, Ea, Eb):
-    n  = Ea * Eb;
-
-    nonzeros = [ (s - self.mu)**2 for s in self.scores ];
-    zeros    = (self.mu**2) * (n - len(self.scores));
-    self.s2 = (1.0/n) * (sum(nonzeros) + zeros);
+  def ests2(self, L):
+    s2 = np.var(L);
+    return s2;
   #edef
 
   #############################################################################
 
   def pvalue(self, **kwargs):
+    # The score is a sum of CLT estimated normal distributions.
+
     score = kwargs.pop('score');
-    Ea = kwargs.pop('Ea');
-    Eb = kwargs.pop('Eb');
-    n  = Ea * Eb;
+    n     = kwargs.pop('n');
+    nue_a = kwargs.pop('nue_a');
+    nue_b = kwargs.pop('nue_b');
 
-    z = (score - (n * self.mu)) / (n * self.s2);
+    mu = (self.H_mu * n) - (self.U1_mu * nue_a) - (self.U2_mu * nue_b);
+    s2 = (self.H_s2 * n) + (self.U1_s2 * nue_a) + (self.U2_s2 * nue_b);
 
+    z = ( score - mu ) / s2;
     p = 1 - stats.norm.cdf(z);
 
     return p;
@@ -63,9 +76,9 @@ class cluster_null_clt:
 
 ###############################################################################
 
-class cluster_null_score_shuff:
+class cluster_null_score_gentle:
 
-  name   = 'cluster_null_score_shuff';
+  name   = 'ClusterNullScoreGentle';
   scores = None;
   perm   = {};
   nperm  = {};
@@ -122,9 +135,9 @@ class cluster_null_score_shuff:
 
 ###############################################################################
 
-class cluster_null_score_shuff_max:
+class cluster_null_score_strict:
 
-  name   = 'cluster_null_score_shuff_max'
+  name   = 'ClusterNullScoreStrict'
   scores = None;
   hits   = None;
   hitA   = None;

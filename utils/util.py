@@ -123,15 +123,35 @@ def overlap(r1, r2):
   if r1[0] < r2[0]:
     e1 = r1[1];
     s2 = r2[0];
+  elif r1[0] == r2[0]:
+    e1 = max(r1[1], r2[1]);
+    s2 = r1[0];
   else:
     e1 = r2[1];
     s2 = r1[0];
   #fi
 
-  ov = e1 - s2;
+  ov  = e1 - s2;
+  mov = min(r1[1] - r1[0], r2[1] - r2[0]);
 
-  return ov;
+  return min(mov, ov);
 #edef
 
 ###############################################################################
+
+def shuffle_sub(L, s=0, e=-1):
+  NL = [];
+  n  = len(L);
+
+  index = [ i for i in xrange(n) ];
+  shfld = [ i for i in xrange(n) ];
+  np.random.shuffle(shfld);
+
+  for (i, j) in zip(index, shfld):
+    k = L[i][0:s] + L[j][s:e] + L[i][e:];
+    NL.append(k);
+  #efor
+
+  return NL;
+#edef
 
