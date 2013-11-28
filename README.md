@@ -15,17 +15,17 @@ The result is a set of large clusters describing high exonic conservation.
 Algorithm
 =========
 
-![We use BLASTp to produce a set of hits, which are used to build](/readme/clustering_dendrogram_a.gif)
-
 We use BLASTp to produce a set of hits, which are used to build
 
-![a dendrogram which is traversed to find](/readme/clustering_dendrogram_b.gif)
+![We use BLASTp to produce a set of hits, which are used to build](/readme/clustering_dendrogram_a.gif)
 
 a dendrogram which is traversed to find
 
-![significant clusters.](/readme/clustering_dendrogram_c.gif)
+![a dendrogram which is traversed to find](/readme/clustering_dendrogram_b.gif)
 
 significant clusters
+
+![significant clusters.](/readme/clustering_dendrogram_c.gif)
 
 Dependencies
 =============
