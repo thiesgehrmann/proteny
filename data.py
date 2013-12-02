@@ -26,7 +26,7 @@ def example(org, chr, odir=None):
 
 ###############################################################################
 
-def agabi(odir = None):
+def agabi2(odir = None):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta');
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz'));
   genome   = genome_a | Stack | genome_b;
@@ -44,7 +44,30 @@ def agabi(odir = None):
     Export(genome, '%s/proteny_sequences.fasta' % (odir));
   #fi
 
-  return ("agabi", genes, genome);
+  return ("agabi2", genes, genome);
+#edef
+
+###############################################################################
+
+def agabi3(odir = None):
+  #genome = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_3/download/Agabi_varbisH97_3_AssemblyScaffolds.fasta.gz'), format='fasta');
+  #genes  = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_3/download/Agabi_varbisH97_3_GeneCatalog_genes_20120316.gff.gz'));
+  genome = Read("%s/2b-agabi3/Agabi_varbisH97_3_AssemblyScaffolds.fasta.gz" % dd);
+  genes  = Read("%s/2b-agabi3/Agabi_varbisH97_3_GeneCatalog_genes_20120316.gff.gz" % dd);
+
+  genes = genes[_.f2 == 'CDS'];
+  genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.Copy();
+  genome = genome.Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  #fi
+
+  return ("agabi3", genes, genome);
 #edef
 
 ###############################################################################
@@ -66,6 +89,27 @@ def schco2(odir = None):
   #fi
 
   return ("schco2", genes, genome);
+#edef
+
+###############################################################################
+
+def schco3(odir = None):
+  genome = Read(Fetch('http://genome.jgi-psf.org/Schco3/download/Schco3_AssemblyScaffolds.fasta.gz'));
+  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco3/download/Schco3_GeneCatalog_genes_20130812.gff.gz'));
+  
+  genes = genes[_.f2 == 'CDS'];
+  genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.Copy();
+  genome = genome.Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  #fi
+
+  return ("schco3", genes, genome);
 #edef
 
 ###############################################################################

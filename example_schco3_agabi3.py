@@ -13,16 +13,16 @@ import data;
 
 ###############################################################################
 
-savename = 'PR_schco2_agabi2.proteny';
+savename = 'PR_schco3_agabi3.proteny';
 circdir  = 'circos';
 
 ###############################################################################
 # DATA
 
   # Download data for Schizophyllum commune
-sc = data.schco2();
+sc = data.schco3();
   # Download data for Agaricus bisporus
-ag = data.agabi22();
+ag = data.agabi3();
 
   # Prepare the protenty analysis
 PR = ps.proteny();
@@ -103,8 +103,8 @@ def viz(PR, k):
 
 k = PR.analyze(id_a=id_a, id_b=id_b);
 
-nulls = [ null.cluster_null_score_gentle, null.cluster_null_score_strict ];
-cuts  = [ 'greedy', 'simple' ];
+nulls = [ null.cluster_null_score_gentle ]; 
+cuts  = [ 'simple' ];
 
 for N in nulls:
   for C in cuts:
