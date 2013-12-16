@@ -214,3 +214,17 @@ def hit_clust_2_reg(PR, k, ci, name=None):
 #edef
 
 ###############################################################################
+
+def delndups(PR, k):
+
+  """ Return a list of clusters which have an obvious deletion or duplication """
+
+  dups = [ i for (i,C) in enumerate(PR.hit_clusters[k])  if not(len(C[9]) == len(C[10])) ];
+
+  return dups;
+
+#edef
+
+###############################################################################
+
+
