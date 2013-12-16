@@ -13,7 +13,7 @@ import data;
 
 ###############################################################################
 
-savename = 'PR_schco3_agabi3.proteny';
+savename = 'PR_schco3_agabi3_fact2.proteny';
 circdir  = 'circos';
 
 ###############################################################################
@@ -67,7 +67,7 @@ def viz(PR, k):
   for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
     for r in rs:
       reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
-      cr.circos_region(files, reg, 0, circdir, 'reg_discovered_' + KS + '_' + reg[0]);
+      cr.circos_region(files, reg, 0, circdir, 'RegDiscovered_' + KS + '_' + reg[0]);
       print 'RegDiscovered_' + KS + '_' + reg[0] + '.conf';
     #efor
   #efor
@@ -84,16 +84,16 @@ def viz(PR, k):
 
 
     # Visualize a region
-  for reg in regions:
-    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
-    print 'RegKnown_' + KS + '_' + reg[0];
-  #efor
+#  for reg in regions:
+#    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
+#    print 'RegKnown_' + KS + '_' + reg[0];
+#  #efor
 
   # Visualize relationships between chromosomes
-  agabichrs = ["agabi_scaffold_%d" % (i+1) for i in xrange(21) ];
-  for i in xrange(36):
-    cc.circos_chr(files, agabichrs + ["schco2_scaffold_%d" % (i+1)], ["schco2_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
-    print "Scaffold_%02d_%s" % (i+1, KS);
+  agabichrs = ["agabi3_scaffold_%d" % (i+1) for i in xrange(PR.org_genomes[k['id_b']].Shape()()) ];
+  for i in xrange(PR.org_genomes[k['id_a']].Shape()()):
+    cc.circos_chr(files, agabichrs + ["schco3_scaffold_%d" % (i+1)], ["schco3_scaffold_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
+    print "scaffold_%02d_%s" % (i+1, KS);
   #efor
 
 #edef
@@ -111,7 +111,7 @@ for N in nulls:
     k = PR.hit_cluster(k, alpha=0.05, cut=C, nd=N);
     PR.save(savename);
     print k;
-    #viz(PR, k);
+    viz(PR, k);
   #efor
 #efor    
 

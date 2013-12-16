@@ -221,7 +221,8 @@ def calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, dist):
   dsize = lambda d: sum([ len(d[k]) for k in d]);
   nd = null_dist(dist=dist, 
                  scores=[ h[12] for h in hits],
-                 hits=hits, hitA=hitA, hitB=hitB);
+                 hits=hits, hitA=hitA, hitB=hitB,
+                 factor=2);
 
   tests = sum([len(T[k]) for k in T]);
 

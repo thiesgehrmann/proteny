@@ -211,3 +211,24 @@ def aniger_513_88(odir = None):
 #edef
 
 ###############################################################################
+
+def pleos2(odir = None):
+  genome = Read(Fetch("http://genome.jgi.doe.gov/PleosPC15_2/download/PleosPC15_2_Assembly_scaffolds.fasta.gz"));
+  genes  = Read(Fetch("http://genome.jgi.doe.gov/PleosPC15_2/download/PleosPC15_2_GeneModels_FilteredModels1.gff.gz"));
+
+  genes = genes[_.f2 == 'CDS'];
+  genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
+  genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.Copy();
+  genome = genome.Copy();
+
+  if not(odir == None):
+    Export(genes,  '%s/proteny_genes.tsv' % (odir));
+    Export(genome, '%s/proteny_sequences.fasta' % (odir));
+  #fi
+
+  return ("pleos2", genes, genome);
+#edef
+
+###############################################################################
