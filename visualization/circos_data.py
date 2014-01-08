@@ -6,6 +6,8 @@ def write_data(PR, k, dir):
   """Write data for task k in directory dir"""
   files = {};
 
+  mkdir_p(dir);
+
   files['karyotype'], chr_colors = write_karyotype(PR, k, dir);
   files['genes']                 = write_genes(PR, k, dir);
   files['exons']                 = write_exons(PR, k, dir);
@@ -161,4 +163,13 @@ def write_exons(PR, k, dir):
 
 #############################################################################
 
+def mkdir_p(path):
+    # By lzot from http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+#edef
 

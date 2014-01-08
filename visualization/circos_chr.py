@@ -24,7 +24,7 @@ class circos_chr:
     self.outdir      = outdir;
     self.name        = name;
 
-    for dir in [ '%s/%s' % (self.outdir, dir) for dir in [ 'data', 'etc' ]]:
+    for dir in [ '%s/%s' % (self.outdir, dir) for dir in [ 'data' ]]:
       try:
         os.makedirs(dir);
       except Exception:
@@ -94,7 +94,7 @@ chromosomes                 = %s
   show_label       = yes
   label_font       = default
   label_radius     = dims(image,radius) - 60p
-  label_size       = 30
+  label_size       = 50
   label_parallel   = yes
 
 </ideogram>

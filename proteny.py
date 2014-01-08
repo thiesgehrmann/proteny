@@ -153,7 +153,7 @@ class proteny:
 
   __exon_slice_names__ = __gene_slice_names__ + ('sequence',)
 
-  def translate_exons(self, genome, genes):
+  def translate_exons(self, genome, genes, level):
 
     EG = genes.GroupBy(_.transcriptid).Get(_.chrid[0], _.start, _.end, _.strand[0], _.geneid[0], _.transcriptid, _.exonid).Copy();
 
@@ -364,7 +364,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05, cut='greedy', nd=null.cluster_null_score_strict):
+  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \

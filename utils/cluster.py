@@ -212,7 +212,7 @@ def calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, dist):
       k = (h[j], h[k]);
       if not(k in H):
         H[k] = i;
-      elif h[12] > hits[H[k]]:
+      elif h[12] > hits[H[k]][12]:
          H[k] = i;
       #fi
     #efor

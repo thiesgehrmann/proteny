@@ -16,6 +16,9 @@ from ibidas import *
 
 ###############################################################################
 
+__gene_slice_names__   = ( 'chrid', 'start', 'end', 'strand', 'geneid', 'transcriptid', 'exonid' );
+__genome_slice_names__ = ( 'chrid', 'sequence');
+
 def example(org, chr, odir=None):
   (name, genes, genome) = org(odir = odir);
   genes  = genes[_.f0 == chr];
@@ -35,6 +38,12 @@ def agabi2(odir = None):
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
 
   genes  = genes.Copy();
   genome = genome.Copy();
@@ -59,6 +68,12 @@ def agabi3(odir = None):
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
 
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Copy();
   genome = genome.Copy();
 
@@ -80,6 +95,12 @@ def schco2(odir = None):
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
 
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Copy();
   genome = genome.Copy();
 
@@ -100,6 +121,12 @@ def schco3(odir = None):
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[1]).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
 
   genes  = genes.Copy();
   genome = genome.Copy();
@@ -124,6 +151,9 @@ def human(odir = "%s/human" % dd):
 
   genome = genome.Get(_.f0, _.seq);
 
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Copy();
   genome = genome.Copy();
 
@@ -146,6 +176,9 @@ def mouse(odir = "%s/mus_musculus" % dd):
 
   genome = genome.Get(_.f0, _.seq);
 
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Copy();
   genome = genome.Copy();
 
@@ -159,6 +192,7 @@ def mouse(odir = "%s/mus_musculus" % dd):
 
 ###############################################################################
 
+  # Not available publicly yet...
 def aniger_n402(odir = None):
   genome = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta', sep=[]);
   genes  = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff');
@@ -173,6 +207,12 @@ def aniger_n402(odir = None):
 
   genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
 
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x[-6:]).Cast(int).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x[-6:]).Cast(int).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Detect().Copy();
   genome = genome.Detect().Copy();
 
@@ -181,7 +221,7 @@ def aniger_n402(odir = None):
     Export(genome, '%s/proteny_sequences.tsv' % (odir));
   #fi
 
-  return ("aniger_n402", genes, genome);
+  return ("n402", genes, genome);
 #edef
 
 ###############################################################################
@@ -199,6 +239,12 @@ def aniger_513_88(odir = None):
 
   genome = genome.To(_.f0, Do=_.Each(lambda x: x.split('_')[0]));
 
+  genes  = genes.To(_.f0, Do=_.Each(lambda x: x[-2:]).Cast(int).Cast(str));
+  genome = genome.To(_.f0, Do=_.Each(lambda x: x[-2:]).Cast(int).Cast(str));
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
+
   genes  = genes.Detect().Copy();
   genome = genome.Detect().Copy();
 
@@ -207,7 +253,7 @@ def aniger_513_88(odir = None):
     Export(genome, '%s/proteny_sequences.tsv' % (odir));
   #fi
 
-  return ("aniger_513_88", genes, genome);
+  return ("513.88", genes, genome);
 #edef
 
 ###############################################################################
@@ -219,6 +265,9 @@ def pleos2(odir = None):
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
   genes = genes.Get(_.f0, _.f3, _.f4, _.f6, _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[0]), _.f8.Each(lambda x: x[1])).Detect();
+
+  genes  = genes / __gene_slice_names__;
+  genome = genome / __genome_slice_names__;
 
   genes  = genes.Copy();
   genome = genome.Copy();

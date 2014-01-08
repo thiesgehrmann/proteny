@@ -10,10 +10,12 @@ import circos_chr    as cc;
 import proteny as ps;
 import data;
 
+import postprocessing as pp;
+
 ###############################################################################
 
 savename = 'PR_aniger.proteny';
-circdir  = 'circos';
+circdir  = 'visualizations/aniger';
 
 ###############################################################################
 # DATA
@@ -47,20 +49,21 @@ PR.save(savename);
   # Export data into a CIRCOS format
 files = cdata.write_data(PR, k, '%s/data' % circdir);
 
-           #('bri1',   [ ('schco2', 'scaffold_1',    5346259, 5348750), ('agabi', 'scaffold_1',  1865954, 1869064) ] ),
-regions = [ ('strange',[ ('aniger_n402',   'ACJE01000001',  436263,  466251),
-                         ('aniger_513_88', 'An01',         1618193, 1644408),
-                         ('aniger_513_88', 'An11',         1443277, 1470326) ]) ];
+KS = PR.key_s(k);
 
-  # Visualize a region
-for reg in regions:
-  cr.circos_region(files, reg, 30000, circdir, ('aniger_reg_%s' % reg[0]));
+IR  = pp.hit_cluster_overlap(PR, k);
+IRs = [ ir for ir in IR if ir[0] == '18' ];
+
+IRs = [ ('correct_mapping', [ ('n402', '21', 884643, 917655), ('513.88', '8', 880417, 909428), ('513.88', '14', 482348, 497064) ]) ];
+for reg in IRs:
+  cr.circos_region(files, reg, 100, circdir, ('RegOverlapping_' + KS + '_' + reg[0]));
+  print 'RegOverlapping_' + KS + '_' + reg[0];
 #efor
 
 
   # Visualize relationships between chromosomes
-anchrs = [ "aniger_513_88_An%02d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
+anchrs = [ "513.88_%d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
 for i in xrange(an1[2].Shape()()):
- cc.circos_chr(files, anchrs + ["aniger_n402_ACJE010000%02d" % (i+1)], ["aniger_n402_ACJE010000%02d=0.4r" % (i+1)], circdir, "An%02d" % (i+1) );
+ cc.circos_chr(files, anchrs + ["n402_%d" % (i+1)], ["n402_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
 #efor
 
