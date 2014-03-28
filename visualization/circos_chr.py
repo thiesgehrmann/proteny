@@ -135,16 +135,16 @@ chromosomes                 = %s
     bezier_radius = 0r
     thickness     = 2
     ribbon        = yes
+    stroke_color     = vdgrey_a4
+    stroke_thickness = 1
     
     <rules>
       flow = continue
       <rule>
-        condition = var(score) < 0.8
-        show      = no
-      </rule>
-      <rule>
         condition = 1
-        color     = eval(sprintf("hsv(%d,%f,%f)", var(h), 1.0, 1.0 ))
+        #color     = eval(sprintf("hsv(%d,%f,%f)", var(h), 1.0, 1.0 ))
+        color     = eval(sprintf("%d,%d,%d,0.5", var(r_int), var(g_int), var(b_int)))
+        z         = eval( 99999999999999999 - min(var(SIZE1),var(SIZE2)) )
         #flat     = yes
       </rule>
     </rules>

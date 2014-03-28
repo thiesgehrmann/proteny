@@ -2,6 +2,8 @@ from ibidas import *;
 
 import numpy as np;
 import bisect;
+import shlex, subprocess, os;
+import os.path;
 
 ###############################################################################
 
@@ -154,4 +156,80 @@ def shuffle_sub(L, s=0, e=-1):
 
   return NL;
 #edef
+
+###############################################################################
+
+def run_par_cmds(cmd_list, max_threads=12, stdin=None, stdout=None, stderr=None):
+
+  p = [];
+  i = 0;
+  retval = 0;
+  cmds = len(cmd_list);
+
+  while True:
+    while len(p) < max_threads and i < cmds:
+      print "RUNNING: %s" % cmd_list[i]; sys.stdout.flush();
+      p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      i = i + 1;
+    #ewhile
+
+    time.sleep(0.5);
+
+    running = [ (j, k) for (j,k) in p if j.poll() == None ];
+    completed = [ (j, k) for (j,k) in p if j.poll() != None ];
+
+    for (j,k) in completed:
+      if j.returncode != 0:
+        retval = retval + j.returncode;
+        print "ERROR: Failed in cmd: %s" % cmd_list[k]; sys.stdout.flush();
+      else:
+        print "COMPLETED: cmd : %s" % cmd_list[k]; sys.stdout.flush();
+      #fi
+    #efor
+    p = running;
+    if len(p) == 0:
+      break;
+    #fi
+  #ewhile
+
+  return retval;
+#edef
+
+
+###############################################################################
+
+def run_seq_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
+
+  for cmd in [ x for x in cmd_list if x ]:
+    retval = run_cmd(cmd, stdin=stdin, stdout=stdout, stderr=stderr);
+    if retval != 0:
+      print "ERROR: Failed on cmd: %s" % cmd;
+      return retval;
+    #fi
+    print "COMPLETED: cmd : %s" % cmd;
+    sys.stdout.flush();
+  #efor
+
+  return 0;
+#edef
+
+###############################################################################
+
+def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
+  p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
+  if bg:
+    return p;
+  else:
+    (pid, r) = os.waitpid(p.pid, 0);
+    return r;
+  #fi
+#edef
+
+###############################################################################
+
+def fex(fname):
+  return os.path.isfile(fname);
+#edef
+
+###############################################################################
 

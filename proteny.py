@@ -6,14 +6,14 @@ from ibidas import *;
 from scipy.cluster import hierarchy;
 import numpy as np;
 
-sys.path.append('./utils');
-import seq as sequtils;
-import smoothing;
-import cluster as cluster;
+from utils import seq as sequtils;
+from utils import cluster;
+from utils import util;
+from utils import cluster_null as null;
+
+reload(sequtils);
 reload(cluster);
-import util as util;
 reload(util);
-import cluster_null as null;
 reload(null);
 
 from ibidas.utils.util import debug_here;
@@ -37,7 +37,6 @@ class proteny:
   hit_distances       = {};
   hit_dendrograms     = {};
   hit_clusters        = {};
-  hit_clusters_height = {};
 
   ###############################################################################
 
@@ -55,7 +54,6 @@ class proteny:
     self.hit_distances       = {};
     self.hit_dendrograms     = {};
     self.hit_clusters        = {};
-    self.hit_clusters_height = {};
 
     if not(load == None):
       p = cPickle.load(open(load, 'r'));
@@ -67,7 +65,7 @@ class proteny:
 
   ###############################################################################
 
-  def analyze(self, id_a=0, id_b=1):
+  def analyze(self, id_a=0, id_b=1, cut='simple', nd=null.cluster_null_score_strict_smart):
 
       # Run BLAST
     k = self.blast(id_a=id_a, id_b=id_b);
@@ -79,13 +77,13 @@ class proteny:
     k = self.hit_dendrogram(k);
 
       # Cut the dendrogram.
-    k = self.hit_cluster(k);
+    k = self.hit_cluster(k, cut=cut, nd=nd);
 
     return k;
   #edef
 
   ###############################################################################
-  key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'H', 'alpha', 'nd', 'cut' ];
+  key_elems = [ 'id_a' , 'id_b', 'linkage_type', 'alpha', 'nd', 'cut' ];
   def key(self, k):
     nk        = dict([ (f, None) for f in self.key_elems]);
 
@@ -98,9 +96,9 @@ class proteny:
   ###############################################################################
 
   def key_s(self, k):
-    names  = '%s_%s'    % (self.org_names[k['id_a']], self.org_names[k['id_b']]);
-    params = '%s_%s'    % (k['linkage_type'], str(k['H']));
-    clust  = '%s_%s_%s' % (k['cut'], k['nd'], str(k['alpha']));
+    names  = '_'.join([self.org_names[k['id_a']], self.org_names[k['id_b']]]);
+    params = '_'.join([k['linkage_type'] ]);
+    clust  = '_'.join([k['cut'], k['nd'], str(k['alpha'])]);
 
     return '_'.join([names, params, clust]);
   #edef
@@ -153,7 +151,7 @@ class proteny:
 
   __exon_slice_names__ = __gene_slice_names__ + ('sequence',)
 
-  def translate_exons(self, genome, genes, level):
+  def translate_exons(self, genome, genes):
 
     EG = genes.GroupBy(_.transcriptid).Get(_.chrid[0], _.start, _.end, _.strand[0], _.geneid[0], _.transcriptid, _.exonid).Copy();
 
@@ -266,54 +264,54 @@ class proteny:
 
   ###############################################################################
 
-  def windows(self, k, WS=0):
-
-    k['WS'] = WS;
-
-    if self.hit_window_index != None:
-      H, O = self.hit_window_index;
-    else:
-      if (k['id_a'], k['id_b']) not in self.blast_hits:
-        print "You need to run blast() first!";
-        return None;
-      #fi
-
-      BR = self.blast_hits[(k['id_a'], k['id_b'])];
-      F  = util.reindex_blast(BR);
-
-      hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.coverage, _.pident, _.evalue, _.bitscore);
-      BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
-      BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
-
-      brs  = [ BR_a, BR_b ];
-
-      H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
-      O = [];
-
-      for br in brs:
-        org_ind, H = smoothing.sort_org(br, H);
-        O.append(org_ind);
-      #efor
-      self.hit_window_index = (H, O);
-    #fi
-
-    hlen = len(H);
-
-    print "Smoothing hits. This will take a while!";
-    RS = [];
-    for h in xrange(hlen):
-      print "\r%d/%d" % (h+1, hlen),
-      sys.stdout.flush();
-      RS.append(smoothing.get_reg_hits(H, O, h, WS));
-    #efor
-    print "";
-
-    scores = [ smoothing.score(RS[j]) for j in xrange(hlen)]
-
-    self.hit_windows[(k['id_a'], k['id_b'], k['WS'])] = scores;
-
-    return k;
-  #edef
+#  def windows(self, k, WS=0):
+#
+#    k['WS'] = WS;
+#
+#    if self.hit_window_index != None:
+#      H, O = self.hit_window_index;
+#    else:
+#      if (k['id_a'], k['id_b']) not in self.blast_hits:
+#        print "You need to run blast() first!";
+#        return None;
+#      #fi
+#
+#      BR = self.blast_hits[(k['id_a'], k['id_b'])];
+#      F  = util.reindex_blast(BR);
+#
+#      hits = F.Get(_.i, _.a_chrid, _.a_geneid, _.a_exonid, _.b_chrid, _.b_geneid, _.b_exonid, _.coverage, _.pident, _.evalue, _.bitscore);
+#      BR_a = F.Get(_.i, _.a_chrid, _.a_start, _.a_end) / ('i', 'chrid', 'start', 'end');
+#      BR_b = F.Get(_.i, _.b_chrid, _.b_start, _.b_end) / ('i', 'chrid', 'start', 'end');
+#
+#      brs  = [ BR_a, BR_b ];
+#
+#      H = [ [[]] + list(x[1:]) for x in zip(*hits()) ]
+#      O = [];
+#
+#      for br in brs:
+#        org_ind, H = smoothing.sort_org(br, H);
+#        O.append(org_ind);
+#      #efor
+#      self.hit_window_index = (H, O);
+#    #fi
+#
+#    hlen = len(H);
+#
+#    print "Smoothing hits. This will take a while!";
+#    RS = [];
+#    for h in xrange(hlen):
+#      print "\r%d/%d" % (h+1, hlen),
+#      sys.stdout.flush();
+#      RS.append(smoothing.get_reg_hits(H, O, h, WS));
+#    #efor
+#    print "";
+#
+#    scores = [ smoothing.score(RS[j]) for j in xrange(hlen)]
+#
+#    self.hit_windows[(k['id_a'], k['id_b'], k['WS'])] = scores;
+#
+#    return k;
+#  #edef
 
   #############################################################################
 
@@ -364,7 +362,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict):
+  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict_smart, ngenes_threshold=2, conservation_ratio=0):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \
@@ -383,7 +381,7 @@ class proteny:
     chrs_a = self.org_chrs[k['id_a']];
     chrs_b = self.org_chrs[k['id_b']];
 
-    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, cut=cut, alpha=alpha, dist=nd);
+    C = cluster.calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, nd, ngenes_threshold, conservation_ratio);
 
     self.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd'])] = C;
 
@@ -392,29 +390,29 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster_height(self, k, H):
-
-    if ((k['id_a'], k['id_b']) not in self.hits) or \
-       ((k['id_a'], k['id_b']) not in self.hit_distances) or \
-       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.hit_dendrograms):
-      print "You must run hit_index(), hit_distance() and hit_dendrogram() first!";
-      return None;
-    #fi
-
-    k['H'] = H;
-
-    hits  = self.hits[(k['id_a'], k['id_b'])];
-    T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
-    
-    chrs_a = self.org_chrs[k['id_a']];
-    chrs_b = self.org_chrs[k['id_b']];
-    
-    C = cluster.calc_clusters_height(T, hits, chrs_a, chrs_b, H);
-    
-    self.hit_clusters_height[(k['id_a'], k['id_b'], k['linkage_type'], k['H'])] = C;
-    
-    return k;
-  #edef
+#  def hit_cluster_height(self, k, H):
+#
+#    if ((k['id_a'], k['id_b']) not in self.hits) or \
+#       ((k['id_a'], k['id_b']) not in self.hit_distances) or \
+#       ((k['id_a'], k['id_b'], k['linkage_type']) not in self.hit_dendrograms):
+#      print "You must run hit_index(), hit_distance() and hit_dendrogram() first!";
+#      return None;
+#    #fi
+#
+#    k['H'] = H;
+#
+#    hits  = self.hits[(k['id_a'], k['id_b'])];
+#    T     = self.hit_dendrograms[(k['id_a'], k['id_b'], k['linkage_type'])];
+#    
+#    chrs_a = self.org_chrs[k['id_a']];
+#    chrs_b = self.org_chrs[k['id_b']];
+#    
+#    C = cluster.calc_clusters_height(T, hits, chrs_a, chrs_b, H);
+#    
+#    self.hit_clusters_height[(k['id_a'], k['id_b'], k['linkage_type'], k['H'])] = C;
+#    
+#    return k;
+#  #edef
 
   #############################################################################
 

@@ -1,4 +1,7 @@
 from ibidas import *;
+import os;
+import errno;
+import colorsys;
 
 #############################################################################
 
@@ -28,7 +31,7 @@ def write_clusts(PR, k, dir, chr_colors):
   C = PR.hit_clusters[(k['id_a'], k['id_b'], k['linkage_type'], k['alpha'], k['cut'], k['nd'])];
 
   color_org = (PR.org_names[i], 0) if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 3);
-  color = lambda h: chr_colors[color_org[0]][h[color_org[1]]];
+  color = lambda h: chr_colors[color_org[0]][str(h[color_org[1]])];
 
   filename = '%s/clusters_%s.tsv' % (dir, PR.key_s(k));
   fnames.append(filename);
@@ -36,8 +39,9 @@ def write_clusts(PR, k, dir, chr_colors):
   for (k, c) in enumerate(C):
     # 0      1        2      3      4        5      6       7      8        9
     #(a_chr, a_start, a_end, b_chr, b_start, b_end, n_hits, score, prots_a, prots_b)
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_a=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], c[0], c[1], c[2], c[6], c[7], c[8], ';'.join([str(id) for id in c[9]]), color(c)));
-    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,p=%f,prots_b=%s,h=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], c[3], c[4], c[5], c[6], c[7], c[8], ';'.join([str(id) for id in c[10]]), color(c)));
+    r_int, g_int, b_int = [ int(255*intensity) for intensity in colorsys.hsv_to_rgb(float(color(c))/360.0,1.0,1.0) ]
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,n=%d,nue_a=%d,nue_b=%d,p=%f,prots_a=%s,h=%d,r_int=%d,g_int=%d,b_int=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[i], c[0], c[1], c[2], c[6], c[7][0],c[7][1],c[7][2],c[7][3], c[8], ';'.join([str(id) for id in c[9]]),  color(c), r_int, g_int, b_int));
+    fd.write('clusters_%s_%s_%010d\t%s_%s\t%d\t%d\tnhits=%d,score=%f,n=%d,nue_a=%d,nue_b=%d,p=%f,prots_b=%s,h=%d,r_int=%d,g_int=%d,b_int=%d\n' % (PR.org_names[i], PR.org_names[j], k, PR.org_names[j], c[3], c[4], c[5], c[6], c[7][0],c[7][1],c[7][2],c[7][3], c[8], ';'.join([str(id) for id in c[10]]), color(c), r_int, g_int, b_int));
   #efor
   fd.close();
 
@@ -49,10 +53,14 @@ def write_clusts(PR, k, dir, chr_colors):
 def write_blast(PR, k, dir, chr_colors):
 
   fnames = [];
-  D = dict([(slicename, i) for (i, slicename) in enumerate(PR.__blast_slice_names__)]);
+  i      = k['id_a'];
+  j      = k['id_b'];
 
-  i = k['id_a'];
-  j = k['id_b'];
+  if (i,j) not in PR.blast_hits:
+   return fnames;
+  #fi
+
+  D = dict([(slicename, indx) for (indx, slicename) in enumerate(PR.__blast_slice_names__)]);
 
   F = PR.blast_hits[(i,j)];
   filename = '%s/blast.%s.%s.tsv' % (dir, PR.org_names[i], PR.org_names[j]);
@@ -60,7 +68,7 @@ def write_blast(PR, k, dir, chr_colors):
   fd = open(filename, 'w');
 
   color_org = (PR.org_names[i], 'a_chrid') if len(chr_colors[PR.org_names[i]]) < len(chr_colors[PR.org_names[j]]) else (PR.org_names[j], 'b_chrid');
-  color = lambda h: chr_colors[color_org[0]][h[D[color_org[1]]]];
+  color = lambda h: chr_colors[color_org[0]][str(h[D[color_org[1]]])];
 
   H = zip(*F());
   for (hitid, hit) in enumerate(H):
@@ -105,7 +113,7 @@ def write_karyotype(PR, k, dir):
       if PR.org_names[i] not in chr_colors:
         chr_colors[PR.org_names[i]] = {};
       #fi
-      chr_colors[PR.org_names[i]][id] = color;
+      chr_colors[PR.org_names[i]][str(id)] = color;
     #efor
     fd.close();
   #efor

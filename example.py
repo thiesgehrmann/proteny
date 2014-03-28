@@ -1,41 +1,22 @@
 #!/usr/bin/python
 
 import sys;
-sys.path.append('utils');
-sys.path.append('visualization');
+import os;
 
-import cluster_null as null;
-import circos_data as cdata;
-import circos_region as cr;
-import circos_chr    as cc;
+from utils import cluster_null as null;
+
+from visualization import circos_data as cdata;
+from visualization import circos_region as cr;
+from visualization import circos_chr    as cc;
+
 import proteny as ps;
 import data;
 import postprocessing as pp;
 
 ###############################################################################
-
-savename = 'PR_schco2_agabi2.proteny';
-circdir  = 'visualizations/basid';
-
-###############################################################################
-# DATA
-
-  # Download data for Schizophyllum commune
-sc = data.schco2();
-  # Download data for Agaricus bisporus
-ag = data.agabi2();
-
-  # Prepare the protenty analysis
-PR = ps.proteny();
-
-  # Add our organisms.
-id_a = PR.add_org(*sc, isfile=False);
-id_b = PR.add_org(*ag, isfile=False);
-
-###############################################################################
 # VISUALIZE
 
-def viz(PR, k):
+def viz(PR, k, circdir):
   KS = PR.key_s(k);
 
         # name     [ (org_name, ID,       chrid,        start,   end,     strand) ... ]
@@ -64,19 +45,19 @@ def viz(PR, k):
   files = cdata.write_data(PR, k, '%s/data' % circdir);
 
     # Clusters containing our genes.
-  fc = pp.hit_clusters_containing(PR, k, [ j[1] for j in interesting_genes ], [])[0];
-  for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
-    for r in rs:
-      reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
-      cr.circos_region(files, reg, 100, circdir, 'reg_discovered_' + KS + '_' + reg[0]);
-      print 'RegDiscovered_' + KS + '_' + reg[0] + '.conf';
-    #efor
-  #efor
+#  fc = pp.hit_clusters_containing(PR, k, [ j[1] for j in interesting_genes ], [])[0];
+#  for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
+#    for r in rs:
+#      reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
+#      cr.circos_region(files, reg, 100, circdir, 'reg_discovered_' + KS + '_' + reg[0]);
+#      print 'RegDiscovered_' + KS + '_' + reg[0] + '.conf';
+#    #efor
+#  #efor
 
     # Overlapping clusters
   IR = pp.hit_cluster_overlap(PR, k);
   IR = sorted(IR, key=lambda x: len(x[1]));
-  IRs = [ ir for ir in IR if ir[0] == '94' ];
+  IRs = [ ir for ir in IR if ir[0] == '2' ];
 
   for reg in IRs:
     cr.circos_region(files, reg, 100, circdir, ('RegOverlapping_' + KS + '_' + reg[0]));
@@ -85,29 +66,63 @@ def viz(PR, k):
 
 
     # Visualize a region
-  for reg in regions:
-    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
-    print 'RegKnown_' + KS + '_' + reg[0];
-  #efor
+#  for reg in regions:
+#    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
+#    print 'RegKnown_' + KS + '_' + reg[0];
+#  #efor
 
   # Visualize relationships between chromosomes
-  agabichrs = ["agabi2_%d" % (i+1) for i in xrange(21) ];
-  for i in xrange(36):
-    cc.circos_chr(files, agabichrs + ["schco2_%d" % (i+1)], ["schco2_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
+  bchrs = ["%s_%s" % (PR.org_names[k['id_b']], str(i)) for i in PR.org_genomes[k['id_b']].Get(0)() ];
+  for i in xrange(PR.org_genomes[k['id_a']].Shape()()):
+    cc.circos_chr(files, bchrs + ["%s_%d" % (PR.org_names[k['id_a']], i+1)], ["%s_%d=0.4r" % (PR.org_names[k['id_a']], i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
     print "scaffold_%02d_%s" % (i+1, KS);
   #efor
 
+
+#  bchrs = ["agabi2_%d" % (i+1) for i in xrange(PR.org_genomes[k['id_b']].Shape()()) ];
+#  for i in xrange(36):
+#    cc.circos_chr(files, bchrs + ["schco2_%d" % (i+1)], ["schco2_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
+#    print "scaffold_%02d_%s" % (i+1, KS);
+#  #efor
+
 #edef
+
+###############################################################################
+
+savename = 'PR_schco2_agabi2_moreperms.proteny';
+circdir  = 'visualizations/basid';
+
+###############################################################################
+# DATA
+
+  # Download data for Schizophyllum commune
+sc = data.schco2();
+  # Download data for Agaricus bisporus
+ag = data.agabi2();
+
+  # Prepare the protenty analysis
+PR = ps.proteny();
+
+  # Add our organisms.
+id_a = PR.add_org(*sc, isfile=False);
+id_b = PR.add_org(*ag, isfile=False);
 
 ###############################################################################
 # ANALYSIS
 
   # Run analysis
-k = PR.analyze(id_a=id_a, id_b=id_b);
+k = PR.analyze(id_a=id_a, id_b=idb, cut='simple', nd=null.cluster_null_score_strict_smart);
   # Save! It's important!
 PR.save(savename);
 
   # Produce circos visualizations
-viz(PR, k);
+viz(PR, k, 'visualizations/basid_more/smart');
 
+#for r in [ 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0 ]:
+#  k = PR.hit_cluster(k, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, conservation_ratio=r)
+#  fout = 'PR_basid_r_test_%0.2f' % r;
+#  circdir = 'visualizations/basid_moreperms_check/complete_deeper_greater_%0.2f' % r;
+#  PR.save(fout);
+#  viz(PR, k);
+#efor
 
