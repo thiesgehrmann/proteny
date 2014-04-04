@@ -65,7 +65,7 @@ class proteny:
 
   ###############################################################################
 
-  def analyze(self, id_a=0, id_b=1, cut='simple', nd=null.cluster_null_score_strict_smart):
+  def analyze(self, id_a=0, id_b=1, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=1):
 
       # Run BLAST
     k = self.blast(id_a=id_a, id_b=id_b);
@@ -77,7 +77,7 @@ class proteny:
     k = self.hit_dendrogram(k);
 
       # Cut the dendrogram.
-    k = self.hit_cluster(k, cut=cut, nd=nd);
+    k = self.hit_cluster(k, alpha=alpha, cut=cut, nd=nd,  ngenes_threshold=ngenes_threshold, conservation_ratio=conservation_ratio);
 
     return k;
   #edef
@@ -362,7 +362,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict_smart, ngenes_threshold=2, conservation_ratio=0):
+  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict_smart, ngenes_threshold=2, conservation_ratio=1):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \

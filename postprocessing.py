@@ -685,7 +685,8 @@ def cmp_run_overlaps(PRa, ka, PRb, kb):
 
   total_coverage_a = 0;
   total_coverage_b = 0;
-  overlap          = 0;
+  overlap_a        = 0;
+  overlap_b        = 0;
 
   for c in clusts_a:
     k = (str(c[0]), str(c[3]));
@@ -712,13 +713,16 @@ def cmp_run_overlaps(PRa, ka, PRb, kb):
         print k
         print (c[1], c[2]), (rc[1], rc[2]), "->", ov_a
         print (c[4], c[5]), (rc[4], rc[5]), "->", ov_b
-        overlap = overlap + ov_a + ov_b;
+        overlap_a = overlap_a + ov_a;
+        overlap_b = overlap_b + ov_b;
       #fi
     #efor
 
-  print overlap, total_coverage_a, total_coverage_b
+  print overlap_a, overlap_b, total_coverage_a, total_coverage_b
 
-  return (float(overlap) / float(total_coverage_a + total_coverage_b));
+  return ((float(overlap_a + overlap_b) / float(total_coverage_a + total_coverage_b)),
+          float(overlap_a) / float(total_coverage_a),
+          float(overlap_b) / float(total_coverage_b));
 
 #edef
 

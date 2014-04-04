@@ -35,13 +35,14 @@ id_b = PR.add_org(*an2, isfile=False);
 ###############################################################################
 # ANALYSIS
 
-#k = PR.analyze(id_a=id_a, id_b=id_b);
-k  = PR.blast(id_a=id_a, id_b=id_b);
-k  = PR.hit_index(k);
-k  = PR.hit_distance(k);
-k  = PR.hit_dendrogram(k);
-k1 = PR.hit_cluster(k, cut='simple', nd=null.cluster_null_score_strict);
-k2 = PR.hit_cluster(k, cut='greedy', nd=null.cluster_null_score_strict);
+  # Run analysis
+k = PR.analyze(id_a=id_a, id_b=id_b, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=2);
+  # Save! It's important!
+PR.save(savename);
+
+  # Produce circos visualizations
+viz(PR, k, circdir);
+
 
 
 ###############################################################################
@@ -76,25 +77,8 @@ def viz(PR, k, circdir):
 
 
   # Produce circos visualizations
-viz(PR, k1, 'visualizations/basid_more/greedy');
-viz(PR, k2, 'visualizations/basid_more/simple');
+viz(PR, k, 'visualizations/basid_more/greedy');
 
 ###############################################################################
 ###############################################################################
-
-#IR  = pp.hit_cluster_overlap(PR, k);
-#IRs = [ ir for ir in IR if ir[0] == '18' ];
-
-#IRs = [ ('correct_mapping', [ ('n402', '21', 884643, 917655), ('513.88', '8', 880417, 909428), ('513.88', '14', 482348, 497064) ]) ];
-#for reg in IRs:
-#  cr.circos_region(files, reg, 100, circdir, ('RegOverlapping_' + KS + '_' + reg[0]));
-#  print 'RegOverlapping_' + KS + '_' + reg[0];
-##efor
-
-
-  # Visualize relationships between chromosomes
-anchrs = [ "513.88_%d" % (i+1)  for i in xrange(an2[2].Shape()()) ];
-for i in xrange(an1[2].Shape()()):
- cc.circos_chr(files, anchrs + ["n402_%d" % (i+1)], ["n402_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
-#efor
 

@@ -119,6 +119,8 @@ def score_dendrogram_node(T, n, hits, chrs_a, chrs_b, hitA, hitB):
 ###############################################################################
 
 def score_hits(H, hits, chrs_a, chrs_b, hitA, hitB):
+  """Given a set of hits, calculate a cluster score."""
+
   print "----START SCORE"
 
   hit_ex_a = [ (h[2], h[3]) for h in H ];
@@ -143,13 +145,7 @@ def score_hits(H, hits, chrs_a, chrs_b, hitA, hitB):
   SE_b = sum([ hits[hitB[k]][12] for k in nz_UE_b ]);
 
   score_sum = sum([h[12] for h in H]);
-  #print len(hitA), len(hitB);
-  #print "MEAN_G:", len(H) * np.mean([h[12] for h in hits]);
-  #print "MEAN_A:", len(nz_UE_a) * np.mean([hits[v][12] for v in hitA.values()]);
-  #print "MEAN_B:", len(nz_UE_b) * np.mean([hits[v][12] for v in hitB.values()]);
   score = 2*score_sum - SE_a - SE_b;
-
-  #print "SCORE COMPONENTS: ", (score_sum, SE_a, SE_b, score);
 
   return (score, ex_a, ex_b, UE_a, UE_b, nz_UE_a, nz_UE_b);
 
@@ -157,116 +153,9 @@ def score_hits(H, hits, chrs_a, chrs_b, hitA, hitB):
 
 ###############################################################################
 
-#def calc_clusters_height(T, hits, chrs_a, chrs_b, H):
-#
-#  C = [];
-#
-#  for k in T.keys():
-#    t = T[k];
-#
-#    c = cut_dendrogram_height(t, hits, chrs_a, chrs_b, H);
-#
-#    C = C + c;
-#  #efor
-#
-#  return C;
-#
-##edef
-#
-################################################################################
-#
-#def cut_dendrogram_height(T, hits, chrs_a, chrs_b, H=0):
-#  """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
-#   Inputs
-#       T       The linkage tree
-#       hits:   The indexed hits
-#       chrs_a: The output of prep_exon_list() for organism 0
-#       chrs_b: The output of prep_exon_list() for organism 1
-#       H:      The height to cut at.
-#     Outputs: 
-#       C: A list of clusters of the form (L, score) where L is a list of hits in the cluster, and score is the score associated with that cluster
-#  """
-#
-#  istack = [ -1 ];
-#  C = [];
-#
-#  while len(istack) > 0:
-#
-#    index = istack.pop();
-#
-#    I, J, dist, ids     = T[index];
-#    score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b);
-#
-#    if dist <= H:
-#      cdesc = clust_description(hits, ids, score, 0);
-#      C.append(cdesc);
-#    else:
-#      if not(I is None):
-#        istack.append(I);
-#      #fi
-#      if not(J is None):
-#        istack.append(J);
-#      #fi
-#    #fi
-#  #efor
-#
-#  return C;
-##edef
-
-###############################################################################
-
-#def calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, dist):
-#
-#  C = [];
-#
-#    # Precompute max hit scores per exon
-#  hitA = {};
-#  hitB = {};
-#  v     = [ (2,3,hitA), (5,6,hitB) ];
-#
-#  for (i, h) in enumerate(hits):
-#    for (j, k, H) in v:
-#      k = (h[j], h[k]);
-#      if not(k in H):
-#        H[k] = i;
-#      elif h[12] > hits[H[k]][12]:
-#         H[k] = i;
-#      #fi
-#    #efor
-#  #efor
-#
-#  tests = sum([len(T[k]) for k in T]);
-#  alpha = alpha / float(tests);
-#
-#  nd = null_dist(dist=dist,
-#                 alpha = alpha,
-#                 scores=[ h[12] for h in hits],
-#                 hits=hits, hitA=hitA, hitB=hitB);
-#
-#  print "Calculating clusters, this will take some time, too";
-#  for (i, k) in enumerate(T.keys()):
-#    print '\r%d/%d' % (i, len(T.keys())), k,
-#    sys.stdout.flush();
-#    t = T[k];
-#
-#    if cut == 'greedy':
-#      c = cut_dendrogram_max(t, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha);
-#    elif cut == 'simple':
-#      c = cut_dendrogram(t, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha);
-#    else:
-#      c = [];
-#    #fi
-#
-#    C = C + c;
-#  #efor
-#
-#  return C;
-#
-##edef
-
-###############################################################################
-
 def calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, dist, ngenes_threshold, conservation_ratio):
+  """Detect significant clusters based on the dynamic cutting algorithm."""
+
 
   C = [];
 
@@ -329,6 +218,8 @@ def calc_clusters(T, hits, chrs_a, chrs_b, cut, alpha, dist, ngenes_threshold, c
 ###############################################################################
 
 def complete_set(T, start_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, cut, ngenes_threshold, conservation_ratio):
+  """Perform one loop of the dynamic correction algorithm."""
+
   tests = nd.tests;
 
   sig_clusts = start_clusts
@@ -363,376 +254,384 @@ def complete_set(T, start_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, cut, nge
 
 ###############################################################################
 
-#def cut_dendrogram_tests_simple(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
-#
-#  iqueue = sig_clusts;
-#  SC     = [];
-#
-#  i = 0;
-#
-#  while len(iqueue) > 0:
-#    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
-#    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
-#    t               = T[(c1,c2)];
-#    I, J, dist, ids = t[index];
-#    i = i + 1;
-#
-#    if C_info == None:
-#      C_info = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
-#      C_info = (C_info[0], len(ids), len(C_info[5]), len(C_info[6]));
-#    #fi
-#    score, n, nz_nue_a, nz_nue_b = C_info;
-#
-#    pvalue = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#
-#    if pvalue < (nd.alpha / nd.tests):
-#      SC.append((c1, c2, index, C_info, pvalue));
-#      print "SIGNIFICANT!!!!", SC[-1];
-#      continue;
-#    else:
-#      additional_tests = 0;
-#      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
-#      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
-#      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
-#
-#      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
-#      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
-#      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
-#
-#      if I is not None and suff_I:
-#        iqueue.insert(0, (c1, c2, I, None, None));
-#        additional_tests = additional_tests + 1;
-#      #fi
-#      if J is not None and suff_J:
-#        iqueue.insert(0, (c1, c2, J, None, None));
-#        additional_tests = additional_tests + 1;
-#      #fi
-#      nd.update_mperm(nd.tests + additional_tests);
-#    #fi
-#  #ewhile
-#
-#  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
-#  return SC;
-#
-##edef
-#
-#
-################################################################################
-#
-#def cut_dendrogram_tests_greater(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
-#
-#  iqueue = sig_clusts;
-#  SC     = [];
-#
-#  i = 0;
-#
-#  while len(iqueue) > 0:
-#    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
-#    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
-#    t               = T[(c1,c2)];
-#    I, J, dist, ids = t[index];
-#    i = i + 1;
-#
-#    if C_info == None:
-#      C_info = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
-#      C_info = (C_info[0], len(ids), len(C_info[5]), len(C_info[6]));
-#    #fi
-#    score, n, nz_nue_a, nz_nue_b = C_info;
-#
-#      # Use only clusters which have more hits than unaccounted hits
-#    if n < nz_nue_a + nz_nue_b:
-#      pvalue = 1.0;
-#    else:
-#      pvalue = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#    #fi
-#
-#    if pvalue < (nd.alpha / nd.tests):
-#      SC.append((c1, c2, index, C_info, pvalue));
-#      print "SIGNIFICANT!!!!", SC[-1];
-#      continue;
-#    else:
-#      additional_tests = 0;
-#      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
-#      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
-#      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
-#
-#      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
-#      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
-#      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
-#
-#      if I is not None and suff_I:
-#        iqueue.insert(0, (c1, c2, I, None, None));
-#        additional_tests = additional_tests + 1;
-#      #fi
-#      if J is not None and suff_J:
-#        iqueue.insert(0, (c1, c2, J, None, None));
-#        additional_tests = additional_tests + 1;
-#      #fi
-#      nd.update_mperm(nd.tests + additional_tests);
-#    #fi
-#  #ewhile
-#
-#  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
-#  return SC;
-#
-##edef
-#
-#
-################################################################################
-#
-#def cut_dendrogram_tests_max(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
-#
-#  if len(sig_clusts) == 1:
-#    istack = [ (a,b,c,None,(0.0,1.0),0.0,0) for (a,b,c,d,e) in sig_clusts ];
-#    SC     = [];
-#
-#    i_count = 0;
-#    while len(istack) > 0:
-#      (c1, c2, index, C_info, (zscore,pvalue), max_zscore, have_sc) = istack.pop();
-#      t               = T[(c1,c2)];
-#      I, J, dist, ids = t[index];
-#
-#      ngenes_a = len(set([hits[h][2] for h in t[index][3]]));
-#      ngenes_b = len(set([hits[h][5] for h in t[index][3]]));
-#      suff     = (ngenes_a > ngenes_threshold) or (ngenes_b > ngenes_threshold);
-#   
-#      if not(suff):
-#        continue;
-#      #fi
-#
-#      if C_info == None:
-#        C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
-#        C_info   = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
-#
-#        nd.update_mperm(nd.tests + 1);
-#        score, n, nz_nue_a, nz_nue_b = C_info;
-#        (zscore, pvalue)             = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#
-#        max_zscore = max(max_zscore, zscore);
-#        istack.append((c1, c2, index, C_info, (zscore,pvalue), max_zscore, len(SC)));
-#        istack.append((c1, c2, I,     None,   (0.0,1.0),       max_zscore, len(SC)));
-#        istack.append((c1, c2, J,     None,   (0.0,1.0),       max_zscore, len(SC)));
-#
-#        print len(istack), len(t), i_count;
-#        i_count = i_count + 1;
-#      else:
-#        print "WE HAVE RETURNED!";
-#        # We have returned!!
-#        if len(SC) == have_sc and zscore >= max_zscore:
-#          # We did not find any significant clusters beneath this node, and this IS the significant node!
-#          print "WE FOUND MAX SIG!";
-#          SC.append((c1,c2,index,C_info,pvalue));
-#        #fi
-#    #ewhile
-#
-#  else:
-#    SC = sig_clusts
-#  #fi
-#
-#  SCF = [];
-#  for sc in SC:
-#    (c1,c2,index,C_info,pvalue)  = sc;
-#    score, n, nz_nue_a, nz_nue_b = C_info
-#
-#    # Recalculate the pvalue here
-#    (zscore,pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#    if pvalue < (nd.alpha / float(len(SC))):
-#      SCF.append(sc);
-#    #fi
-#  #efor
-#
-#  print SCF;
-#
-#  return SCF;
-#
-##edef
-#
-################################################################################
-#
-#def cut_dendrogram_tests_peaks(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
-#
-#  if len(sig_clusts) == 1:
-#    istack = [ (a,b,c,d,e,False) for (a,b,c,d,e) in sig_clusts ];
-#    SC     = [];
-#    
-#    i_count = 0;
-#    while len(istack) > 0:
-#      clust = istack.pop();
-#      (c1, c2, index, C_info, measure, parent_zscore) = clust;
-#      t               = T[(c1,c2)];
-#      I, J, dist, ids = t[index];
-#      
-#      ngenes_a = len(set([hits[h][2] for h in t[index][3]]));
-#      ngenes_b = len(set([hits[h][5] for h in t[index][3]]));
-#      suff     = (ngenes_a > ngenes_threshold) or (ngenes_b > ngenes_threshold);
-#      
-#      if not(suff):
-#        continue;
-#      #fi
-#
-#      if C_info == None:
-#        C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
-#        C_info   = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
-#
-#        score, n, nz_nue_a, nz_nue_b = C_info;
-#        (zscore, pvalue)             = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#      else:
-#        (zscore, pvalue) = measure;
-#      #fi
-#      
-#      (I_zscore, I_pvalue) = (0.0, 1.0);
-#      (J_zscore, J_pvalue) = (0.0, 1.0);
-#
-#      if I != None:
-#        I_info_r             = score_dendrogram_node(t, I, hits, chrs_a, chrs_b, hitA, hitB);
-#        I_info               = (I_info_r[0], len(t[I][3]), len(I_info_r[5]), len(I_info_r[6]));
-#        (I_zscore, I_pvalue) = nd.pvalue(score=I_info[0], n=I_info[1], nue_a=I_info[2], nue_b=I_info[3]);
-#        istack.append((c1, c2, I, I_info, (I_zscore, I_pvalue), zscore));
-#      #fi
-#
-#      if J != None:
-#        J_info_r             = score_dendrogram_node(t, J, hits, chrs_a, chrs_b, hitA, hitB);
-#        J_info               = (J_info_r[0], len(t[J][3]), len(J_info_r[5]), len(J_info_r[6]));
-#        (J_zscore, J_pvalue) = nd.pvalue(score=J_info[0], n=J_info[1], nue_a=J_info[2], nue_b=J_info[3]);
-#        istack.append((c1, c2, J, J_info, (J_zscore, J_pvalue), zscore));
-#      #fi
-#
-#      if ((zscore > I_zscore) or (zscore > J_zscore)) and zscore > parent_zscore:
-#        print "WE FOUND A PEAK!";
-#        SC.append((c1, c2, index, C_info, (zscore,pvalue)));
-#      #fi
-#
-#      
-#
-#      print len(istack), len(t), i_count;
-#      i_count = i_count + 1;
-#    #ewhile
-#
-#  else:
-#    SC = sig_clusts
-#  #fi
-#
-#  SCF = [];
-#  for sc in SC:
-#    (c1,c2,index,C_info,pvalue)  = sc;
-#    score, n, nz_nue_a, nz_nue_b = C_info
-#    
-#    # Recalculate the pvalue here
-#    (zscore,pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#    if pvalue < (nd.alpha / float(len(SC))):
-#      SCF.append(sc);
-#    #fi
-#  #efor
-#
-#  print SCF;
-#
-#  return SCF;
-#
-##edef
-#
-################################################################################
-#
-#def cut_dendrogram_tests_deeper(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
-#
-#  iqueue = sig_clusts;
-#  SC     = [];
-#
-#  i = 0;
-#
-#  while len(iqueue) > 0:
-#    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
-#    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
-#    t               = T[(c1,c2)];
-#    I, J, dist, ids = t[index];
-#    i = i + 1;
-#    deeper = 0; # We have not found any /more/ significant clusters... yet
-#
-#      # Only calculate the score if we don't already have it...
-#    if C_info == None:
-#      C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
-#      C_info = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
-#    #fi
-#    score, n, nz_nue_a, nz_nue_b = C_info;
-#
-#      # Check if children would be eligible for descending into.
-#    suff_I = I is not None;
-#    if suff_I:
-#      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
-#      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
-#      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
-#    #fi
-#
-#    suff_J = J is not None;
-#    if suff_J:
-#      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
-#      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
-#      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
-#    #fi
-#
-#      # Get pvalue for cluster
-#    (zscore, pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
-#
-#      # OK, we have a significant cluster. Now check if it's children are /more/ significant...
-#    if pvalue < (nd.alpha / nd.tests):
-#      (I_zscore, I_pvalue) = (0.0, 1.0);
-#      (J_zscore, J_pvalue) = (0.0, 1.0);
-#
-#        # Calculate pvalues for child I
-#      if suff_I:
-#        I_info_r = score_dendrogram_node(t, I, hits, chrs_a, chrs_b, hitA, hitB);
-#        I_info   = (I_info_r[0], len(t[I][3]), len(I_info_r[5]), len(I_info_r[6]));
-#        (I_zscore, I_pvalue) = nd.pvalue(score=I_info[0], n=I_info[1], nue_a=I_info[2], nue_b=I_info[3]);
-#      #fi
-#
-#        # calculate pvalues for child J
-#      if suff_J:
-#        J_info_r = score_dendrogram_node(t, J, hits, chrs_a, chrs_b, hitA, hitB);
-#        J_info   = (J_info_r[0], len(t[J][3]), len(J_info_r[5]), len(J_info_r[6]));
-#        (J_zscore, J_pvalue) = nd.pvalue(score=J_info[0], n=J_info[1], nue_a=J_info[2], nue_b=J_info[3]);
-#      #fi
-#
-#      if I_zscore > zscore:
-#        iqueue.append((c1, c2, I, I_info, I_pvalue));
-#        print "DESCENDING LEFT: MORE SIG";
-#        deeper = deeper + 1;
-#      #fi
-#
-#      if J_zscore > zscore:
-#        iqueue.append((c1, c2, J, J_info, J_pvalue));
-#        print "DESCENDING RIGHT: MORE SIG";
-#        deeper = deeper + 1;
-#      #fi
-#
-#      if deeper == 0:
-#        SC.append((c1, c2, index, C_info, pvalue));
-#        print "SIGNIFICANT!!!!", SC[-1];
-#      #fi
-#    else:
-#
-#      if suff_I:
-#        iqueue.append((c1, c2, I, None, None));
-#        print "DESCENDING LEFT";
-#        deeper = deeper + 1;
-#      #fi
-#      if suff_J:
-#        iqueue.append((c1, c2, J, None, None));
-#        print "DESCENDING RIGHT";
-#        deeper = deeper + 1;
-#      #fi
-#    #fi
-#
-#    nd.update_mperm(nd.tests + deeper);
-#  #ewhile
-#
-#  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
-#  return SC;
-#
-##edef
+def cut_dendrogram_tests_simple(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
+  """ Cut as soon as we find a significant cluster"""
+
+  iqueue = sig_clusts;
+  SC     = [];
+
+  i = 0;
+
+  while len(iqueue) > 0:
+    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
+    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
+    t               = T[(c1,c2)];
+    I, J, dist, ids = t[index];
+    i = i + 1;
+
+    if C_info == None:
+      C_info = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
+      C_info = (C_info[0], len(ids), len(C_info[5]), len(C_info[6]));
+    #fi
+    score, n, nz_nue_a, nz_nue_b = C_info;
+
+    pvalue = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+
+    if pvalue < (nd.alpha / nd.tests):
+      SC.append((c1, c2, index, C_info, pvalue));
+      print "SIGNIFICANT!!!!", SC[-1];
+      continue;
+    else:
+      additional_tests = 0;
+      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
+      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
+      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
+
+      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
+      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
+      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
+
+      if I is not None and suff_I:
+        iqueue.insert(0, (c1, c2, I, None, None));
+        additional_tests = additional_tests + 1;
+      #fi
+      if J is not None and suff_J:
+        iqueue.insert(0, (c1, c2, J, None, None));
+        additional_tests = additional_tests + 1;
+      #fi
+      nd.update_mperm(nd.tests + additional_tests);
+    #fi
+  #ewhile
+
+  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
+  return SC;
+
+#edef
+
+
+###############################################################################
+
+def cut_dendrogram_tests_greater(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2, conservation_ratio=1):
+  """Cut as soon as we find a significant cluster that fulfills the conservation_ratio"""
+
+  iqueue = sig_clusts;
+  SC     = [];
+
+  i = 0;
+
+  while len(iqueue) > 0:
+    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
+    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
+    t               = T[(c1,c2)];
+    I, J, dist, ids = t[index];
+    i = i + 1;
+
+    if C_info == None:
+      C_info = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
+      C_info = (C_info[0], len(ids), len(C_info[5]), len(C_info[6]));
+    #fi
+    score, n, nz_nue_a, nz_nue_b = C_info;
+
+      # Use only clusters which have more hits than unaccounted hits
+    
+    if float(n)/float(nz_nue_a + nz_nue_b) < conservation_ratio:
+      pvalue = 1.0;
+    else:
+      pvalue = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+    #fi
+
+    if pvalue < (nd.alpha / nd.tests):
+      SC.append((c1, c2, index, C_info, pvalue));
+      print "SIGNIFICANT!!!!", SC[-1];
+      continue;
+    else:
+      additional_tests = 0;
+      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
+      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
+      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
+
+      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
+      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
+      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
+
+      if I is not None and suff_I:
+        iqueue.insert(0, (c1, c2, I, None, None));
+        additional_tests = additional_tests + 1;
+      #fi
+      if J is not None and suff_J:
+        iqueue.insert(0, (c1, c2, J, None, None));
+        additional_tests = additional_tests + 1;
+      #fi
+      nd.update_mperm(nd.tests + additional_tests);
+    #fi
+  #ewhile
+
+  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
+  return SC;
+
+#edef
+
+
+###############################################################################
+
+def cut_dendrogram_tests_max(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
+  """Descend into the tree until we find the maximum node in the path. Return all maximum nodes in the branch"""
+
+  if len(sig_clusts) == 1:
+    istack = [ (a,b,c,None,(0.0,1.0),0.0,0) for (a,b,c,d,e) in sig_clusts ];
+    SC     = [];
+
+    i_count = 0;
+    while len(istack) > 0:
+      (c1, c2, index, C_info, (zscore,pvalue), max_zscore, have_sc) = istack.pop();
+      t               = T[(c1,c2)];
+      I, J, dist, ids = t[index];
+
+      ngenes_a = len(set([hits[h][2] for h in t[index][3]]));
+      ngenes_b = len(set([hits[h][5] for h in t[index][3]]));
+      suff     = (ngenes_a > ngenes_threshold) or (ngenes_b > ngenes_threshold);
+   
+      if not(suff):
+        continue;
+      #fi
+
+      if C_info == None:
+        C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
+        C_info   = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
+
+        nd.update_mperm(nd.tests + 1);
+        score, n, nz_nue_a, nz_nue_b = C_info;
+        (zscore, pvalue)             = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+
+        max_zscore = max(max_zscore, zscore);
+        istack.append((c1, c2, index, C_info, (zscore,pvalue), max_zscore, len(SC)));
+        istack.append((c1, c2, I,     None,   (0.0,1.0),       max_zscore, len(SC)));
+        istack.append((c1, c2, J,     None,   (0.0,1.0),       max_zscore, len(SC)));
+
+        print len(istack), len(t), i_count;
+        i_count = i_count + 1;
+      else:
+        print "WE HAVE RETURNED!";
+        # We have returned!!
+        if len(SC) == have_sc and zscore >= max_zscore:
+          # We did not find any significant clusters beneath this node, and this IS the significant node!
+          print "WE FOUND MAX SIG!";
+          SC.append((c1,c2,index,C_info,pvalue));
+        #fi
+    #ewhile
+
+  else:
+    SC = sig_clusts
+  #fi
+
+  SCF = [];
+  for sc in SC:
+    (c1,c2,index,C_info,pvalue)  = sc;
+    score, n, nz_nue_a, nz_nue_b = C_info
+
+    # Recalculate the pvalue here
+    (zscore,pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+    if pvalue < (nd.alpha / float(len(SC))):
+      SCF.append(sc);
+    #fi
+  #efor
+
+  print SCF;
+
+  return SCF;
+
+#edef
+
+###############################################################################
+
+def cut_dendrogram_tests_peaks(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
+  """Return all clusters which are more significant than their children and their parents."""
+
+  if len(sig_clusts) == 1:
+    istack = [ (a,b,c,d,e,False) for (a,b,c,d,e) in sig_clusts ];
+    SC     = [];
+    
+    i_count = 0;
+    while len(istack) > 0:
+      clust = istack.pop();
+      (c1, c2, index, C_info, measure, parent_zscore) = clust;
+      t               = T[(c1,c2)];
+      I, J, dist, ids = t[index];
+      
+      ngenes_a = len(set([hits[h][2] for h in t[index][3]]));
+      ngenes_b = len(set([hits[h][5] for h in t[index][3]]));
+      suff     = (ngenes_a > ngenes_threshold) or (ngenes_b > ngenes_threshold);
+      
+      if not(suff):
+        continue;
+      #fi
+
+      if C_info == None:
+        C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
+        C_info   = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
+
+        score, n, nz_nue_a, nz_nue_b = C_info;
+        (zscore, pvalue)             = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+      else:
+        (zscore, pvalue) = measure;
+      #fi
+      
+      (I_zscore, I_pvalue) = (0.0, 1.0);
+      (J_zscore, J_pvalue) = (0.0, 1.0);
+
+      if I != None:
+        I_info_r             = score_dendrogram_node(t, I, hits, chrs_a, chrs_b, hitA, hitB);
+        I_info               = (I_info_r[0], len(t[I][3]), len(I_info_r[5]), len(I_info_r[6]));
+        (I_zscore, I_pvalue) = nd.pvalue(score=I_info[0], n=I_info[1], nue_a=I_info[2], nue_b=I_info[3]);
+        istack.append((c1, c2, I, I_info, (I_zscore, I_pvalue), zscore));
+      #fi
+
+      if J != None:
+        J_info_r             = score_dendrogram_node(t, J, hits, chrs_a, chrs_b, hitA, hitB);
+        J_info               = (J_info_r[0], len(t[J][3]), len(J_info_r[5]), len(J_info_r[6]));
+        (J_zscore, J_pvalue) = nd.pvalue(score=J_info[0], n=J_info[1], nue_a=J_info[2], nue_b=J_info[3]);
+        istack.append((c1, c2, J, J_info, (J_zscore, J_pvalue), zscore));
+      #fi
+
+      if ((zscore > I_zscore) or (zscore > J_zscore)) and zscore > parent_zscore:
+        print "WE FOUND A PEAK!";
+        SC.append((c1, c2, index, C_info, (zscore,pvalue)));
+      #fi
+
+      
+
+      print len(istack), len(t), i_count;
+      i_count = i_count + 1;
+    #ewhile
+
+  else:
+    SC = sig_clusts
+  #fi
+
+  SCF = [];
+  for sc in SC:
+    (c1,c2,index,C_info,pvalue)  = sc;
+    score, n, nz_nue_a, nz_nue_b = C_info
+    
+    # Recalculate the pvalue here
+    (zscore,pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+    if pvalue < (nd.alpha / float(len(SC))):
+      SCF.append(sc);
+    #fi
+  #efor
+
+  print SCF;
+
+  return SCF;
+
+#edef
+
+###############################################################################
+
+def cut_dendrogram_tests_deeper(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold=2):
+  """Descend to the child nodes if the parent is less significant than the parent."""
+
+  iqueue = sig_clusts;
+  SC     = [];
+
+  i = 0;
+
+  while len(iqueue) > 0:
+    print "iqueue: %d, sigclusts: %d, done: %d" % (len(iqueue), len(SC), i+1);
+    (c1, c2, index, C_info, old_pvalue) = iqueue.pop();
+    t               = T[(c1,c2)];
+    I, J, dist, ids = t[index];
+    i = i + 1;
+    deeper = 0; # We have not found any /more/ significant clusters... yet
+
+      # Only calculate the score if we don't already have it...
+    if C_info == None:
+      C_info_r = score_dendrogram_node(t, index, hits, chrs_a, chrs_b, hitA, hitB);
+      C_info = (C_info_r[0], len(ids), len(C_info_r[5]), len(C_info_r[6]));
+    #fi
+    score, n, nz_nue_a, nz_nue_b = C_info;
+
+      # Check if children would be eligible for descending into.
+    suff_I = I is not None;
+    if suff_I:
+      I_ngenes_a = len(set([hits[h][2] for h in t[I][3]]));
+      I_ngenes_b = len(set([hits[h][5] for h in t[I][3]]));
+      suff_I = (I_ngenes_a > ngenes_threshold) or (I_ngenes_b > ngenes_threshold);
+    #fi
+
+    suff_J = J is not None;
+    if suff_J:
+      J_ngenes_a = len(set([hits[h][2] for h in t[J][3]]));
+      J_ngenes_b = len(set([hits[h][5] for h in t[J][3]]));
+      suff_J = (J_ngenes_a > ngenes_threshold) or (J_ngenes_b > ngenes_threshold);
+    #fi
+
+      # Get pvalue for cluster
+    (zscore, pvalue) = nd.pvalue(score=score, n=n, nue_a=nz_nue_a, nue_b=nz_nue_b);
+
+      # OK, we have a significant cluster. Now check if it's children are /more/ significant...
+    if pvalue < (nd.alpha / nd.tests):
+      (I_zscore, I_pvalue) = (0.0, 1.0);
+      (J_zscore, J_pvalue) = (0.0, 1.0);
+
+        # Calculate pvalues for child I
+      if suff_I:
+        I_info_r = score_dendrogram_node(t, I, hits, chrs_a, chrs_b, hitA, hitB);
+        I_info   = (I_info_r[0], len(t[I][3]), len(I_info_r[5]), len(I_info_r[6]));
+        (I_zscore, I_pvalue) = nd.pvalue(score=I_info[0], n=I_info[1], nue_a=I_info[2], nue_b=I_info[3]);
+      #fi
+
+        # calculate pvalues for child J
+      if suff_J:
+        J_info_r = score_dendrogram_node(t, J, hits, chrs_a, chrs_b, hitA, hitB);
+        J_info   = (J_info_r[0], len(t[J][3]), len(J_info_r[5]), len(J_info_r[6]));
+        (J_zscore, J_pvalue) = nd.pvalue(score=J_info[0], n=J_info[1], nue_a=J_info[2], nue_b=J_info[3]);
+      #fi
+
+      if I_zscore > zscore:
+        iqueue.append((c1, c2, I, I_info, I_pvalue));
+        print "DESCENDING LEFT: MORE SIG";
+        deeper = deeper + 1;
+      #fi
+
+      if J_zscore > zscore:
+        iqueue.append((c1, c2, J, J_info, J_pvalue));
+        print "DESCENDING RIGHT: MORE SIG";
+        deeper = deeper + 1;
+      #fi
+
+      if deeper == 0:
+        SC.append((c1, c2, index, C_info, pvalue));
+        print "SIGNIFICANT!!!!", SC[-1];
+      #fi
+    else:
+
+      if suff_I:
+        iqueue.append((c1, c2, I, None, None));
+        print "DESCENDING LEFT";
+        deeper = deeper + 1;
+      #fi
+      if suff_J:
+        iqueue.append((c1, c2, J, None, None));
+        print "DESCENDING RIGHT";
+        deeper = deeper + 1;
+      #fi
+    #fi
+
+    nd.update_mperm(nd.tests + deeper);
+  #ewhile
+
+  print "TD: %d, SC: %d TTD: %d\r" %(nd.tests, len(SC), len(iqueue))
+  return SC;
+
+#edef
 
 ###############################################################################
 
 
 def cut_dendrogram_tests_deeper_greater(T, sig_clusts, hits, chrs_a, chrs_b, hitA, hitB, nd, ngenes_threshold, conservation_ratio):
+  """Descend into the child node if the parent is less significant or doesn't satisfy the conservation ratio."""
+
 
   iqueue = sig_clusts;
   SC     = [];
@@ -833,48 +732,6 @@ def cut_dendrogram_tests_deeper_greater(T, sig_clusts, hits, chrs_a, chrs_b, hit
 
 ###############################################################################    
 
-#def cut_dendrogram(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
-#  """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
-#   Inputs
-#       T       The linkage tree
-#       hits:   The indexed hits
-#       chrs_a: The output of prep_exon_list() for organism 0
-#       chrs_b: The output of prep_exon_list() for organism 1
-#     Outputs: 
-#       C: A list of clusters of the form (L, score) where L is a list of hits in the cluster, and score is the score associated with that cluster
-#  """
-#
-#  istack = [ -1 ];
-#  C      = [];
-#
-#  while len(istack) > 0:
-#
-#    index = istack.pop();
-#
-#    I, J, dist, ids     = T[index];
-#    score, ex_a, ex_b, ue_a, ue_b = score_dendrogram_node(T, index, hits, chrs_a, chrs_b, hitA, hitB);
-#
-#    p = nd.pvalue(score=score, n=len(ids), nue_a=len(ue_a), nue_b=len(ue_b));
-#
-#    if p < alpha:
-#     print (len(ids), len(ue_a) + len(ue_b), p, p < alpha);
-#     cdesc = clust_description(hits, ids, score, p);
-#     C.append(cdesc);
-#    else:
-#      if not(I is None):
-#        istack.append(I);
-#      #fi
-#      if not(J is None):
-#        istack.append(J);
-#      #fi
-#    #fi
-#  #ewhile
-#
-#  return C;
-##edef
-
-###############################################################################
-
 def pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd):
   if (index is None):
     return (None, None, None, None, None, 1.0);
@@ -888,68 +745,6 @@ def pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd):
 
   return (score, ex_a, ex_b, ue_a, ue_b, p);
 #edef
-
-###############################################################################
-
-#def cut_dendrogram_max(T, hits, chrs_a, chrs_b, hitA, hitB, nd, alpha):
-#  """C = cut_dendrogram(T, H, O, chrs_a, chrs_b, t)
-#   Inputs
-#       T       The linkage tree
-#       hits:   The indexed hits
-#       chrs_a: The output of prep_exon_list() for organism 0
-#       chrs_b: The output of prep_exon_list() for organism 1
-#     Outputs: 
-#       C: A list of clusters of the form (L, score) where L is a list of hits in the cluster, and score is the score associated with that cluster
-#  """
-#
-#  istack = [ -1 ];
-#  sp     = [ None for i in xrange(len(T)) ];
-#  C      = [];
-#
-#  while len(istack) > 0:
-#    accept = False;
-#    index  = istack.pop();
-#
-#    I, J, dist, ids = T[index];
-#    if sp[index] == None:
-#      sp[index] = pi(T, index, hits, chrs_a, chrs_b, hitA, hitB, nd);
-#    #fi
-#    score, ex_a, ex_b, ue_a, ue_b, p = sp[index];
-#
-#    if p < alpha:
-#      print (len(ids), len(ue_a) + len(ue_b), p)
-#      accept = True;
-#    #fi
-#
-#    if not(I == None) and not(J == None):
-#
-#      sp[I] = pi(T, I, hits, chrs_a, chrs_b, hitA, hitB, nd);
-#      sp[J] = pi(T, J, hits, chrs_a, chrs_b, hitA, hitB, nd);
-#
-#      if (p >= alpha):
-#        istack.append(I);
-#        istack.append(J);
-#      else:
-#        if (sp[I][5] < p):
-#          accept = False;
-#          istack.append(I);
-#        #fi
-#        if (sp[J][5] < p):
-#          accept = False;
-#          istack.append(J);
-#        #fi
-#      #fi
-#    #fi
-#
-#    if accept == True:
-#      #print (len(ids), len(ue_a) + len(ue_b), p); sys.stdout.flush()
-#      cdesc = clust_description(hits, ids, score, p);
-#      C.append(cdesc);
-#    #fi
-#  #ewhile
-#
-#  return C;
-##edef
 
 ###############################################################################
 

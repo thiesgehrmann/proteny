@@ -383,10 +383,10 @@ def viz_iadhore_PR(PR, circdir):
 
 #F   = pd.make_ini(sc, ag, '/home/nfs/thiesgehrmann/groups/w/phd/tasks/synteny/i-adhore-3.0.01/build/experiments/schco2,agabi2', name1="schco2", name2="agabi2");
 
- sc = data.schco2();
- ag = data.agabi2();
- PRi_basid = idata.iadhore_results_circos('~/groups/w/phd/tasks/synteny/i-adhore-3.0.01/build/experiments/schco2,agabi2/results/multiplicon_pairs.txt', sc, ag)
- idata.score_iadhore_PR(PRi_basid, PR_basid)
+# sc = data.schco2();
+# ag = data.agabi2();
+# PRi_basid = idata.iadhore_results_circos('~/groups/w/phd/tasks/synteny/i-adhore-3.0.01/build/experiments/schco2,agabi2/results/multiplicon_pairs.txt', sc, ag)
+# idata.score_iadhore_PR(PRi_basid, PR_basid)
 # idata.viz_iadhore_PR(PRi_basid, 'visualizations/iadhore/basid');
 
 # an1 = data.aniger_n402();

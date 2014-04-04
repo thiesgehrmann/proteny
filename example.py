@@ -45,14 +45,14 @@ def viz(PR, k, circdir):
   files = cdata.write_data(PR, k, '%s/data' % circdir);
 
     # Clusters containing our genes.
-#  fc = pp.hit_clusters_containing(PR, k, [ j[1] for j in interesting_genes ], [])[0];
-#  for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
-#    for r in rs:
-#      reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
-#      cr.circos_region(files, reg, 100, circdir, 'reg_discovered_' + KS + '_' + reg[0]);
-#      print 'RegDiscovered_' + KS + '_' + reg[0] + '.conf';
-#    #efor
-#  #efor
+  fc = pp.hit_clusters_containing(PR, k, [ j[1] for j in interesting_genes ], [])[0];
+  for (g, rs) in zip([ j[0] for j in interesting_genes], fc):
+    for r in rs:
+      reg = pp.hit_clust_2_reg(PR, k, r, name='%s_%d' % (g, r));
+      cr.circos_region(files, reg, 100, circdir, 'reg_discovered_' + KS + '_' + reg[0]);
+      print 'RegDiscovered_' + KS + '_' + reg[0] + '.conf';
+    #efor
+  #efor
 
     # Overlapping clusters
   IR = pp.hit_cluster_overlap(PR, k);
@@ -66,10 +66,10 @@ def viz(PR, k, circdir):
 
 
     # Visualize a region
-#  for reg in regions:
-#    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
-#    print 'RegKnown_' + KS + '_' + reg[0];
-#  #efor
+  for reg in regions:
+    cr.circos_region(files, reg, 30000, circdir, ('RegKnown_' + KS + '_' + reg[0]));
+    print 'RegKnown_' + KS + '_' + reg[0];
+  #efor
 
   # Visualize relationships between chromosomes
   bchrs = ["%s_%s" % (PR.org_names[k['id_b']], str(i)) for i in PR.org_genomes[k['id_b']].Get(0)() ];
@@ -89,8 +89,8 @@ def viz(PR, k, circdir):
 
 ###############################################################################
 
-savename = 'PR_schco2_agabi2_moreperms.proteny';
-circdir  = 'visualizations/basid';
+savename = 'PROTENY_OUTPUT_basid.proteny';
+circdir  = 'PROTENY_OUTPUT/basid';
 
 ###############################################################################
 # DATA
@@ -111,12 +111,12 @@ id_b = PR.add_org(*ag, isfile=False);
 # ANALYSIS
 
   # Run analysis
-k = PR.analyze(id_a=id_a, id_b=idb, cut='simple', nd=null.cluster_null_score_strict_smart);
+k = PR.analyze(id_a=id_a, id_b=id_b, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=1);
   # Save! It's important!
 PR.save(savename);
 
   # Produce circos visualizations
-viz(PR, k, 'visualizations/basid_more/smart');
+viz(PR, k, circdir);
 
 #for r in [ 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0 ]:
 #  k = PR.hit_cluster(k, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, conservation_ratio=r)
