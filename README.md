@@ -46,8 +46,8 @@ modify the "$CIRCOS" variable in "run" to reflect the location of your circos in
 "example.py" contains an example which details the way the tool can be used.
 "run" is a script which actually runs circos finding each configuration file.
 
-'''shell
+```shell
 $> ipython
 In [1]: execfile("example.py");
-'''
+```
 
