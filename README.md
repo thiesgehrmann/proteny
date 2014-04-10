@@ -54,7 +54,7 @@ Although the ipython 'ipcluster' is started automatically by Proteny when it is 
 I therefore recommend starting the ipcluster before starting proteny.
 
 ```shell
-$> ipcluster -n 8 # Start the ipython cluster manager
+$> ipcluster start -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 ```
@@ -75,7 +75,7 @@ The files are accessible for free, but require an account:
 Then, you can run the example as usual:
 
 ```shell
-$> ipcluster -n 8 # Start the ipython cluster manager
+$> ipcluster start -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 ```
