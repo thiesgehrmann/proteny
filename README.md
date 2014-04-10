@@ -124,7 +124,7 @@ id_b = PR.add_org(*org2, isfile=False);
   # Run analysis
 k = PR.analyze(id_a=id_a, id_b=id_b,                     # Perform analysis between the two organisms we added
                cut='deeper_greater',                     # Find the smallest p-value given a conservation ratio
-               nd=null.cluster_null_score_strict_smart,  # Our null distribution (you can define your own if you want
+               nd=null.cluster_null_score_strict_smart,  # Our null distribution
                alpha=0.05,                               # p-value threshold
                ngenes_threshold=2,                       # Dont consider a cluster if it doesn't contain enough genes (not synteny)
                conservation_ratio=1);                    # Conservation ratio requirement
