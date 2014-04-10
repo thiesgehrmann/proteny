@@ -33,6 +33,10 @@ Which are then visualized in a useful way
 
 Dependencies
 =============
+
+Please make sure that the following packages are installed correctly before use.
+(Circos is not necessary to run the program, but it is used to produce the visualizations)
+
  * CIRCOS: http://circos.ca/
  * IBIDAS: https://github.com/mhulsman/ibidas
  * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
