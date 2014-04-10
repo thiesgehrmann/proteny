@@ -46,8 +46,11 @@ modify the "$CIRCOS" variable in "run" to reflect the location of your circos in
 "example.py" contains an example which details the way the tool can be used.
 "run" is a script which runs circos finding each configuration file, to produce the PNG and SVG files.
 
+Although the ipython 'ipcluster' is started automatically by Proteny when it is needed, it does not always behave nicely.
+I therefore recommend starting the ipcluster before starting proteny.
+
 ```shell
-$> ipcluster 12 # Start the ipython cluster manager
+$> ipcluster -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 ```
@@ -65,12 +68,11 @@ The files are accessible for free, but require an account:
  * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz
  * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz
 
-Then, you can run the example as usual
+Then, you can run the example as usual:
 
 ```shell
-$> ipcluster 12 # Start the ipython cluster manager
+$> ipcluster -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 ```
-
 
