@@ -45,10 +45,10 @@ Installation
 =========
 
 Make sure that each dependency (and their dependencies) is installed.
-modify the "$CIRCOS" variable in "run" to reflect the location of your circos installation.
+modify the "$CIRCOS" variable in "circos_run" to reflect the location of your circos installation.
 
 "example.py" contains an example which details the way the tool can be used.
-"run" is a script which runs circos finding each configuration file, to produce the PNG and SVG files.
+"circos_run" is a script which runs circos finding each configuration file, to produce the PNG and SVG files.
 
 Running the example
 =====================
@@ -69,6 +69,8 @@ Then, you can run the example:
 $> ipcluster start -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
+$> cp circos_run PROTENY_OUTPUT/basid
+$> ./circos_run
 ```
 
 Usage
