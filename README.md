@@ -31,18 +31,16 @@ Which are then visualized in a useful way
 ![Visualizations with Circos](/readme/visualization.gif)
 
 
-Dependencies
+Installation
 =============
 
-Please make sure that the following packages are installed correctly before use.
+Proteny depends upon a few other packages.
 (Circos is not necessary to run the program, but it is used to produce the visualizations)
 
  * CIRCOS: http://circos.ca/
  * IBIDAS: https://github.com/mhulsman/ibidas
  * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 
-Installation
-=========
 
 Make sure that each dependency (and their dependencies) is installed.
 modify the "$CIRCOS" variable in "circos_run" to reflect the location of your circos installation.
@@ -58,7 +56,6 @@ The files are accessible for free, but require an account:
 
  * http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz
  * http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz
-
  * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz
  * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz
  * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz
