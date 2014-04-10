@@ -1,21 +1,20 @@
 #!/usr/bin/python
 
 import sys;
-sys.path.append('utils');
-sys.path.append('visualization');
 
-import circos_data as cdata;
-import circos_region as cr;
+from visualization import circos_data as cdata;
+from visualization import circos_region as cr;
 import circos_chr    as cc;
 import proteny as ps;
 import data;
-import cluster_null as null;
+from utils import cluster_null as null;
 import postprocessing as pp;
 
 ###############################################################################
 
-savename = 'PR_aniger.proteny';
-circdir  = 'visualizations/aniger';
+savename = 'PROTENY_OUTPUT_aspni.proteny';
+circdir  = 'PROTENY_OUTPUT/aspni';
+
 
 ###############################################################################
 # DATA

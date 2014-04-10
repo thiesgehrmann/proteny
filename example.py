@@ -1,5 +1,14 @@
 #!/usr/bin/python
 
+# DOWNLOAD THESE FILES FIRST!!!!
+# * http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz
+# * http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz
+# * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz
+# * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz
+# * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz
+
+###############################################################################
+
 import sys;
 import os;
 
@@ -10,12 +19,14 @@ from visualization import circos_region as cr;
 from visualization import circos_chr    as cc;
 
 import proteny as ps;
-import data;
+#import data;
+import example_data as data;
 import postprocessing as pp;
 
 ###############################################################################
-# VISUALIZE
 
+# VISUALIZE
+# A function to produce exactly the visualizations that we want
 def viz(PR, k, circdir):
   KS = PR.key_s(k);
 
@@ -79,14 +90,12 @@ def viz(PR, k, circdir):
   #efor
 
 
-#  bchrs = ["agabi2_%d" % (i+1) for i in xrange(PR.org_genomes[k['id_b']].Shape()()) ];
-#  for i in xrange(36):
-#    cc.circos_chr(files, bchrs + ["schco2_%d" % (i+1)], ["schco2_%d=0.4r" % (i+1)], circdir, "scaffold_%02d_%s" % (i+1, KS) );
-#    print "scaffold_%02d_%s" % (i+1, KS);
-#  #efor
-
 #edef
 
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
 ###############################################################################
 
 savename = 'PROTENY_OUTPUT_basid.proteny';
@@ -112,17 +121,10 @@ id_b = PR.add_org(*ag, isfile=False);
 
   # Run analysis
 k = PR.analyze(id_a=id_a, id_b=id_b, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=1);
+
   # Save! It's important!
 PR.save(savename);
 
   # Produce circos visualizations
 viz(PR, k, circdir);
-
-#for r in [ 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0 ]:
-#  k = PR.hit_cluster(k, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, conservation_ratio=r)
-#  fout = 'PR_basid_r_test_%0.2f' % r;
-#  circdir = 'visualizations/basid_moreperms_check/complete_deeper_greater_%0.2f' % r;
-#  PR.save(fout);
-#  viz(PR, k);
-#efor
 

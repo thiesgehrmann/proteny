@@ -44,10 +44,33 @@ Make sure that each dependency (and their dependencies) is installed.
 modify the "$CIRCOS" variable in "run" to reflect the location of your circos installation.
 
 "example.py" contains an example which details the way the tool can be used.
-"run" is a script which actually runs circos finding each configuration file.
+"run" is a script which runs circos finding each configuration file, to produce the PNG and SVG files.
 
 ```shell
+$> ipcluster 12 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 ```
+
+Running the example
+=====================
+
+You need to download some files from the JGI DOE in order to run this example.
+The files are accessible for free, but require an account:
+
+ * http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz
+ * http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz
+
+ * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz
+ * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz
+ * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz
+
+Then, you can run the example as usual
+
+```shell
+$> ipcluster 12 # Start the ipython cluster manager
+$> ipython
+In [1]: execfile("example.py");
+```
+
 
