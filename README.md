@@ -67,6 +67,7 @@ $> ipcluster start -n 8 # Start the ipython cluster manager
 $> ipython
 In [1]: execfile("example.py");
 $> cp circos_run PROTENY_OUTPUT/basid
+$> cd PROTENY_OUTPUT/basid
 $> ./circos_run
 ```
 
