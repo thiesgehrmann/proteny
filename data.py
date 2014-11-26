@@ -33,7 +33,7 @@ def agabi2(odir = None):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta');
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz'));
   genome   = genome_a | Stack | genome_b;
-  genes    = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz'));
+  genes    = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz'), format='tsv');
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
@@ -62,7 +62,7 @@ def agabi3(odir = None):
   #genome = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_3/download/Agabi_varbisH97_3_AssemblyScaffolds.fasta.gz'), format='fasta');
   #genes  = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_3/download/Agabi_varbisH97_3_GeneCatalog_genes_20120316.gff.gz'));
   genome = Read("%s/2b-agabi3/Agabi_varbisH97_3_AssemblyScaffolds.fasta.gz" % dd);
-  genes  = Read("%s/2b-agabi3/Agabi_varbisH97_3_GeneCatalog_genes_20120316.gff.gz" % dd);
+  genes  = Read("%s/2b-agabi3/Agabi_varbisH97_3_GeneCatalog_genes_20120316.gff.gz" % dd, format='tsv');
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
@@ -89,7 +89,7 @@ def agabi3(odir = None):
 
 def schco2(odir = None):
   genome = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz'));
-  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz'));
+  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz'), format='tsv');
   
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
@@ -116,7 +116,7 @@ def schco2(odir = None):
 
 def schco3(odir = None):
   genome = Read(Fetch('http://genome.jgi-psf.org/Schco3/download/Schco3_AssemblyScaffolds.fasta.gz'));
-  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco3/download/Schco3_GeneCatalog_genes_20130812.gff.gz'));
+  genes  = Read(Fetch('http://genome.jgi-psf.org/Schco3/download/Schco3_GeneCatalog_genes_20130812.gff.gz'), format='tsv');
   
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
@@ -195,7 +195,7 @@ def mouse(odir = "%s/mus_musculus" % dd):
   # Not available publicly yet...
 def aniger_n402(odir = None):
   genome = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta', sep=[]);
-  genes  = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff');
+  genes  = Read('/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff', format='tsv');
 
   #<chrid>\t<start>\t<end>\t<strand>\t<geneid>\t<transcriptid>\t<exonnumber>
   genes = genes[_.f2 == 'exon'];
@@ -228,7 +228,7 @@ def aniger_n402(odir = None):
 
 def aniger_513_88(odir = None):
   genome = Read(Fetch('http://www.aspergillusgenome.org/download/sequence/A_niger_CBS_513_88/current/A_niger_CBS_513_88_current_chromosomes.fasta.gz'));
-  genes  = Read(Fetch('http://www.aspergillusgenome.org/download/gff/A_niger_CBS_513_88/A_niger_CBS_513_88_current_features.gff'));
+  genes  = Read(Fetch('http://www.aspergillusgenome.org/download/gff/A_niger_CBS_513_88/A_niger_CBS_513_88_current_features.gff'), format='tsv');
 
   genes = genes[_.f2 == 'exon'];
   genes = genes.To(_.f8, Do=_.Each(lambda x: x.split(';')));
@@ -260,7 +260,7 @@ def aniger_513_88(odir = None):
 
 def pleos2(odir = None):
   genome = Read(Fetch("http://genome.jgi.doe.gov/PleosPC15_2/download/PleosPC15_2_Assembly_scaffolds.fasta.gz"));
-  genes  = Read(Fetch("http://genome.jgi.doe.gov/PleosPC15_2/download/PleosPC15_2_GeneModels_FilteredModels1.gff.gz"));
+  genes  = Read(Fetch("http://genome.jgi.doe.gov/PleosPC15_2/download/PleosPC15_2_GeneModels_FilteredModels1.gff.gz"), format='tsv');
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));

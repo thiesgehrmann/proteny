@@ -21,7 +21,7 @@ def agabi2(odir = None):
   genome_a = Read('Abisporus_varbisporusH97.v2.maskedAssembly.gz', format='fasta');
   genome_b = Read('Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz', format='fasta');
   genome   = genome_a | Stack | genome_b;
-  genes    = Read('Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz');
+  genes    = Read('Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz', format='tsv');
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
@@ -48,7 +48,7 @@ def agabi2(odir = None):
 
 def schco2(odir = None):
   genome = Read('Schco2_AssemblyScaffolds.fasta.gz', format='fasta');
-  genes  = Read('Schco2_GeneCatalog_genes_20110923.gff.gz');
+  genes  = Read('Schco2_GeneCatalog_genes_20110923.gff.gz', format='tsv');
 
   genes = genes[_.f2 == 'CDS'];
   genes = genes.To(_.f8, Do=_.Each(lambda x:[ y.strip().split(' ')[1] for y in x.split(';')[1:]]));
