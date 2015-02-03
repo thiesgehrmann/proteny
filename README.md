@@ -37,8 +37,11 @@ Installation
 Proteny depends upon a few other packages.
 (Circos is not necessary to run the program, but it is used to produce the visualizations)
 
+ * Python: https://www.python.org/
+ * IPython: http://ipython.org/
  * CIRCOS: http://circos.ca/
  * IBIDAS: https://github.com/mhulsman/ibidas
+ * FastCluster: https://pypi.python.org/pypi/fastcluster
  * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 
 
@@ -51,34 +54,49 @@ modify the "$CIRCOS" variable in "circos_run" to reflect the location of your ci
 Running the example
 =====================
 
-You need to download some files from the JGI DOE in order to run this example.
-The files are accessible for free, but require an account:
-
- * http://genome.jgi-psf.org/Schco2/download/Schco2_AssemblyScaffolds.fasta.gz
- * http://genome.jgi-psf.org/Schco2/download/Schco2_GeneCatalog_genes_20110923.gff.gz
- * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz
- * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz
- * http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.FilteredModels3.gff.gz
-
-Then, you can run the example:
+An example is provided using data from the Yeast Gene Order Browser.
+it produces Circos plots and outputs the clusters in a directory called 'example_output'.
+It can be run with this line:
 
 ```shell
-$> ipcluster start -n 8 # Start the ipython cluster manager
-$> ipython
-In [1]: execfile("example.py");
-$> cp circos_run PROTENY_OUTPUT/basid
-$> cd PROTENY_OUTPUT/basid
-$> ./circos_run
+$> ./run_proteny.sh org1 example_data/org1_genes.tsv example_data/org2_genome.fasta org2 example_data/org2_genes.tsv example_data/org2_genome.fasta 0.05 2 example_output 8
 ```
 
-Usage
-=========
+Simple Usage
+=============
 
-You need to format each data source correctly.
-In "data.py" there are defined some data sources already, which are processed into an IBIDAS format.
-They take as input only a FASTA file and a GTF file.
-As long as they are formatted correctly it is quite straight forward to read them with `Read()`
-Suppose you have defined two data sources `org1()` and `org2()`, you can make a python file which runs Proteny:
+The usage of the wrapper utility is given:
+
+```shell
+Run the proteny software
+  Usage: ./run_proteny.sh <name_org1> <genes_org1> <genome_org1> <name_org2> <genes_org2> <genome_org2> <p-value> <c-thresh> <outdir>
+
+  Arguments:
+    <name_orgX>:   The short name for organism X
+    <genes_orgX>:  The gene description file for organism X
+    <genome_orgX>: The genome fasta file for organism X
+    <p-value>:     The p-value threshold for clusters
+    <c-thresh>:    The conservation threshold for clusters
+    <outdir>:      The output directory to use
+    <ncores>:      The number of cores available to the ipcluster
+```
+
+Advanced Usage
+===============
+
+For each genome, you need to create two files:
+ * A genes file, describing the exon locations of each gene
+ * A fasta file, with the genome sequence of each chromosome.
+
+The genes file must have the following columns, separated by columns:
+    ( 'chrid', 'start', 'end', 'strand', 'geneid', 'transcriptid', 'exonid' )
+The fasta file must have its sequence identifier corresponding to the chromosome id in the genes file.
+Examples can be found in the example_data directory.
+
+Suppose you have created these files for two organisms:
+ * ORG_NAME1: genes_file_1.tsv, genome_file_1.fasta, and
+ * ORG_NAME2: genes_file_2.tsv, genome_file_2.fasta,
+then you can make a python file which runs Proteny:
 
 ```python
 
@@ -110,8 +128,8 @@ def viz(PR, k, outdir):
 #######################################
 
   # Get data
-org1 = data.org1();
-org2 = data.org2();
+org1 = data.read_prepared('ORG_NAME1', 'genes_file_1.tsv', 'genome_file_1.fasta');
+org2 = data.read_prepared('ORG_NAME2', 'genes_file_2.tsv', 'genome_file_2.fasta');
 
   # Prepare the proteny structure
 PR = ps.proteny();

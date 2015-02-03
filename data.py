@@ -29,6 +29,19 @@ def example(org, chr, odir=None):
 
 ###############################################################################
 
+def read_prepared(name, genes_file, genome_file):
+
+  genes = Read(genes_file) / __gene_slice_names__;
+  genes = genes.Cast(bytes, int, int, bytes, bytes, bytes, int);
+ 
+  genome = Read(genome_file) / __genome_slice_names__;
+  genome = genome.Cast(bytes, bytes);
+
+  return (name, genes.Copy(), genome.Copy());
+#edef
+
+###############################################################################
+
 def agabi2(odir = None):
   genome_a = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_varbisporusH97.v2.maskedAssembly.gz'), format='fasta');
   genome_b = Read(Fetch('http://genome.jgi-psf.org/Agabi_varbisH97_2/download/Abisporus_var_bisporus.mitochondrion.scaffolds.fasta.gz'));

@@ -4,6 +4,7 @@
 import sys;
 
 import bisect;
+import fastcluster as fc;
 from scipy.cluster import hierarchy;
 import numpy as np;
 from ibidas import *;
@@ -51,13 +52,13 @@ def calc_distances(hits):
 ###############################################################################
 
 def calc_dendrograms(HC, D, linkage_type='single'):
-  linkage_types = { 'single'   : hierarchy.single,
-                    'complete' : hierarchy.complete,
-                    'average'  : hierarchy.average,
-                    'weighted' : hierarchy.weighted,
-                    'centroid' : hierarchy.centroid,
-                    'median'   : hierarchy.median,
-                    'ward'     : hierarchy.ward };
+  linkage_types = { 'single'   : fc.single,
+                    'complete' : fc.complete,
+                    'average'  : fc.average,
+                    'weighted' : fc.weighted,
+                    'centroid' : fc.centroid,
+                    'median'   : fc.median,
+                    'ward'     : fc.ward };
   T = {};
   print "Calculating linkages. This will take a while!";
   nk = len(D.keys());
