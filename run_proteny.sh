@@ -46,12 +46,12 @@ ncores="${10}";
 
 ###############################################################################
 echo "STARTING IPcluster";
-ipcluster start -n "$ncores";
+ipcluster start -n "$ncores" & sleep 10;
 
 ###############################################################################
 echo "RUNNING PROTENY";
 mkdir -p "$outdir/data"; 
-./run_proteny.py "$name_org1" "$genes_org1" "$genome_org1" "$name_org2" "$genes_org2" "$genome_org2" "$pvalue" "$cthresh" "$outdir";
+time ./run_proteny.py "$name_org1" "$genes_org1" "$genome_org1" "$name_org2" "$genes_org2" "$genome_org2" "$pvalue" "$cthresh" "$outdir";
 
 ###############################################################################
 echo "RUNNING CIRCOS"

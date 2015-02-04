@@ -62,8 +62,8 @@ if __name__ == '__main__':
   genes_org2  = sys.argv[5];
   genome_org2 = sys.argv[6];
   
-  pvalue  = sys.argv[7];
-  cthresh = sys.argv[8];
+  pvalue  = float(sys.argv[7]);
+  cthresh = float(sys.argv[8]);
   outdir  = sys.argv[9];
 
   savename = '%s/proteny_data.proteny' % outdir;
