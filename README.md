@@ -89,13 +89,16 @@ For each genome, you need to create two files:
  * A fasta file, with the genome sequence of each chromosome.
 
 The genes file must have the following columns, separated by columns:
-    ( 'chrid', 'start', 'end', 'strand', 'geneid', 'transcriptid', 'exonid' )
+
+```( 'chromosome_id', 'start', 'end', 'strand', 'gene_id', 'transcript_id', 'exon_id' )```
+
 The fasta file must have its sequence identifier corresponding to the chromosome id in the genes file.
 Examples can be found in the example_data directory.
 
 Suppose you have created these files for two organisms:
- * ORG_NAME1: genes_file_1.tsv, genome_file_1.fasta, and
- * ORG_NAME2: genes_file_2.tsv, genome_file_2.fasta,
+ * **ORG_NAME1**: genes_file_1.tsv, genome_file_1.fasta, and
+ * **ORG_NAME2**: genes_file_2.tsv, genome_file_2.fasta,
+
 then you can make a python file which runs Proteny:
 
 ```python
