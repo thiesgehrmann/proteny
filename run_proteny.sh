@@ -46,7 +46,8 @@ ncores="${10}";
 
 ###############################################################################
 echo "STARTING IPcluster";
-ipcluster start -n "$ncores" & sleep 10;
+ipcluster start -n "$ncores" &
+sleep 10;
 
 ###############################################################################
 echo "RUNNING PROTENY";
@@ -56,7 +57,8 @@ time ./run_proteny.py "$name_org1" "$genes_org1" "$genome_org1" "$name_org2" "$g
 ###############################################################################
 echo "RUNNING CIRCOS"
 cp "./circos_run" "$outdir";
-cd "$outdir" & ./circos_run;
+cd "$outdir";
+./circos_run;
 
 ###############################################################################
 echo "COMPLETE";

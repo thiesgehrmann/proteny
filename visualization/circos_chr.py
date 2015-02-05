@@ -93,8 +93,10 @@ chromosomes                 = %s
 
   show_label       = yes
   label_font       = default
-  label_radius     = dims(image,radius) - 60p
-  label_size       = 50
+  label_radius     = dims(image,radius) - 90p
+  label_size       = 30
+  label_rotate     = no
+
   label_parallel   = yes
 
 </ideogram>

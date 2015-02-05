@@ -89,6 +89,6 @@ if __name__ == '__main__':
   PR.save(savename);
 
     # Produce circos visualizations
-  #viz(PR, k, outdir);
+  viz(PR, k, outdir);
 
 #fi

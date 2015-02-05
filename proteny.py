@@ -3,6 +3,7 @@ import types;
 import cPickle;
 
 from ibidas import *;
+import ibidas.itypes.rtypes as rtypes
 from scipy.cluster import hierarchy;
 import numpy as np;
 
@@ -119,8 +120,8 @@ class proteny:
   def add_org(self, name, genes_data, genome_data, isfile=True):
     id = len(self.org_names);
 
-    genome = self.load_genome(genome_data, isfile=isfile);
-    genes  = self.load_gene_defs(genes_data, isfile=isfile);
+    genome = genome_data;
+    genes  = genes_data;
 
     self.org_names.append(name);
     self.org_genomes.append(genome);
@@ -179,7 +180,7 @@ class proteny:
       #efor
     #efor
 
-    return (Rep(exons) / self.__exon_slice_names__).Detect().Copy();
+    return (Rep(exons) / self.__exon_slice_names__).Cast(bytes, int, int, bytes, bytes, bytes, int, 'protein').Copy();
   #edef
 
   ###############################################################################
@@ -240,6 +241,8 @@ class proteny:
     b_exons = b_exons.To(_.b_sequence, Do=_.ReplaceMissing());
     
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
+    print a_exons.Type;
+    print b_exons.Type;
     R = a_exons | Blast(reciprocal=True, normalize=False, overwrite=False, folder='./blast_runs/') | b_exons
     R = R.Copy();
     

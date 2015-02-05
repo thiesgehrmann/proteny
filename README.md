@@ -45,21 +45,19 @@ Proteny depends upon a few other packages.
  * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 
 
-Make sure that each dependency (and their dependencies) is installed.
-modify the "$CIRCOS" variable in "circos_run" to reflect the location of your circos installation.
-
-"example.py" contains an example which details the way the tool can be used.
-"circos_run" is a script which runs circos finding each configuration file, to produce the PNG and SVG files.
+1. Make sure that each dependency (and their dependencies) is installed.
+2. Clone this github directory.
+3. Modify the "$CIRCOS" variable in "circos_run" to reflect the location of your circos installation.
 
 Running the example
 =====================
 
 An example is provided using data from the Yeast Gene Order Browser.
-it produces Circos plots and outputs the clusters in a directory called 'example_output'.
+I produces Circos plots and outputs the clusters in a directory called 'example_output'.
 It can be run with this line:
 
 ```shell
-$> ./run_proteny.sh org1 example_data/org1_genes.tsv example_data/org2_genome.fasta org2 example_data/org2_genes.tsv example_data/org2_genome.fasta 0.05 2 example_output 8
+$> ./run_proteny.sh Cglabrata example_data/Cglabrata_genome.tsv example_data/Cglabrata_sequence.fasta Zrouxii example_data/Zrouxii_genome.tsv example_data/Zrouxii_sequence.fasta 0.05 1 example_output 10 2>&1 | tee proteny_out.log
 ```
 
 Simple Usage
