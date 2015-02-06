@@ -94,7 +94,7 @@ The genes file must have the following columns, separated by columns:
  * **strand**: *string*, the positve '+', or negative '-' strand
  * **gene_id**: *string*, a gene identifier
  * **transcript_id**: *string*, a transcript identifier
- * **exon_id**: *integer*, the exon number of the current transcript
+ * **exon_id**: *integer*, the exon number within the current transcript
 
 The fasta file must have its sequence identifier corresponding to the chromosome id in the genes file.
 Examples can be found in the example_data directory.
