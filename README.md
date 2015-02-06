@@ -79,6 +79,27 @@ Run the proteny software
     <ncores>:      The number of cores available to the ipcluster
 ```
 
+Input file specification
+-------------------------
+
+For each genome, you need to create two files:
+ * A genes file, describing the exon locations of each gene
+ * A fasta file, with the genome sequence of each chromosome.
+
+The genes file must have the following columns, separated by columns:
+
+ * **chromosome_id**: *string*, chromosome identifier
+ * **start**: *integer*, the start location of this current exon
+ * **end**: *integer*, the end location of this current exon
+ * **strand**: *string*, the positve '+', or negative '-' strand
+ * **gene_id**: *string*, a gene identifier
+ * **transcript_id**: *string*, a transcript identifier
+ * **exon_id**: *integer*, the exon number of the current transcript
+
+The fasta file must have its sequence identifier corresponding to the chromosome id in the genes file.
+Examples can be found in the example_data directory.
+
+
 Advanced Usage
 ===============
 
