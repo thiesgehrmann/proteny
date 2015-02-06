@@ -103,31 +103,24 @@ Examples can be found in the example_data directory.
 Advanced Usage
 ===============
 
-For each genome, you need to create two files:
- * A genes file, describing the exon locations of each gene
- * A fasta file, with the genome sequence of each chromosome.
-
-The genes file must have the following columns, separated by columns:
-
-```( 'chromosome_id', 'start', 'end', 'strand', 'gene_id', 'transcript_id', 'exon_id' )```
-
-The fasta file must have its sequence identifier corresponding to the chromosome id in the genes file.
-Examples can be found in the example_data directory.
-
-Suppose you have created these files for two organisms:
+Suppose you have these files for two organisms:
  * **ORG_NAME1**: genes_file_1.tsv, genome_file_1.fasta, and
  * **ORG_NAME2**: genes_file_2.tsv, genome_file_2.fasta,
 
-then you can make a python file which runs Proteny:
+then you can make a python file which runs Proteny in a more custimizable way:
 
 ```python
 
+  # The null distribution generator for the significance test
 from utils import cluster_null as null;
 
+  # The visualization outputs
 from visualization import circos_data as cdata;
 from visualization import circos_chr  as cc;
 
+  # The proteny functionality itself
 import proteny as ps;
+  # Functions to read the data
 import data;
 
 #######################################
@@ -149,7 +142,7 @@ def viz(PR, k, outdir):
 
 #######################################
 
-  # Get data
+  # Read the data
 org1 = data.read_prepared('ORG_NAME1', 'genes_file_1.tsv', 'genome_file_1.fasta');
 org2 = data.read_prepared('ORG_NAME2', 'genes_file_2.tsv', 'genome_file_2.fasta');
 
@@ -172,7 +165,7 @@ k = PR.analyze(id_a=id_a, id_b=id_b,                     # Perform analysis betw
   # Save! It's important!
 PR.save(savename);
 
-  # Produce circos visualizations
+  # Produce circos visualization files
 viz(PR, k, circdir);
 
 ```
