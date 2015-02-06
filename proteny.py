@@ -1,10 +1,11 @@
+import os;
 import sys;
 import types;
 import cPickle;
 
 from ibidas import *;
-import ibidas.itypes.rtypes as rtypes
 from scipy.cluster import hierarchy;
+from ibidas.utils.util import debug_here;
 import numpy as np;
 
 from utils import seq as sequtils;
@@ -16,8 +17,6 @@ reload(sequtils);
 reload(cluster);
 reload(util);
 reload(null);
-
-from ibidas.utils.util import debug_here;
 
 ###############################################################################
 
@@ -232,6 +231,8 @@ class proteny:
       return None;
     #fi
 
+    blast_dir = os.path.dirname(os.path.realpath(sys.argv[0])) + '/blast_runs/';
+
     a_exons = self.org_exons[id_a];
     a_exons = a_exons / tuple([ 'a_' + s for s in self.__exon_slice_names__]);
     a_exons = a_exons.To(_.a_sequence, Do=_.ReplaceMissing());
@@ -243,7 +244,8 @@ class proteny:
     print "Running BLAST for %s v %s" % (self.org_names[id_a], self.org_names[id_b]);
     print a_exons.Type;
     print b_exons.Type;
-    R = a_exons | Blast(reciprocal=True, normalize=False, overwrite=False, folder='./blast_runs/') | b_exons
+    print blast_dir
+    R = a_exons | Blast(reciprocal=True, normalize=False, overwrite=False, folder=blast_dir) | b_exons
     R = R.Copy();
     
     F = R.Get(_.a_chrid, _.a_strand, _.a_geneid, _.a_transcriptid, _.a_exonid, \

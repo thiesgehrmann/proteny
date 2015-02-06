@@ -30,6 +30,8 @@ fi
 
 ###############################################################################
 
+SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
 name_org1="$1"
 name_org2="$4"
 
@@ -52,11 +54,11 @@ sleep 10;
 ###############################################################################
 echo "RUNNING PROTENY";
 mkdir -p "$outdir/data"; 
-time ./run_proteny.py "$name_org1" "$genes_org1" "$genome_org1" "$name_org2" "$genes_org2" "$genome_org2" "$pvalue" "$cthresh" "$outdir";
+time "${SCRIPTDIR}/run_proteny.py" "$name_org1" "$genes_org1" "$genome_org1" "$name_org2" "$genes_org2" "$genome_org2" "$pvalue" "$cthresh" "$outdir";
 
 ###############################################################################
 echo "RUNNING CIRCOS"
-cp "./circos_run" "$outdir";
+cp "${SCRIPTDIR}/circos_run" "$outdir";
 cd "$outdir";
 ./circos_run;
 
