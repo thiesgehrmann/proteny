@@ -9,7 +9,6 @@ import util;
 import types;
 import cPickle as cpickle;
 
-from ibidas.utils.util import debug_here;
 from IPython.parallel import Client
 
 ###############################################################################
@@ -393,7 +392,6 @@ class cluster_null_score_strict_smart:
       new_topM         = sort_perms[-self.M:]
       self.perm[k]     = (total_perms_done, new_topM);
     #fi
-    #debug_here();
     return self.perm[k];
   #edef
 

@@ -3,7 +3,8 @@
 import sys;
 import os;
 
-from utils import cluster_null as null;
+import cluster_null as null;
+#from utils import cluster_null as null;
 
 from visualization import circos_data as cdata;
 from visualization import circos_region as cr;
@@ -12,6 +13,8 @@ from visualization import circos_chr    as cc;
 import data;
 import proteny as ps;
 import postprocessing as pp;
+
+sys.path= sys.path + [ os.path.dirname(os.path.realpath(__file__)) + ('/%s/' % x if x != '' else '')  for x in ['visualization'] ];
 
 ###############################################################################
 

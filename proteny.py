@@ -5,13 +5,18 @@ import cPickle;
 
 from ibidas import *;
 from scipy.cluster import hierarchy;
-from ibidas.utils.util import debug_here;
 import numpy as np;
 
-from utils import seq as sequtils;
-from utils import cluster;
-from utils import util;
-from utils import cluster_null as null;
+import seq as sequtils;
+import cluster;
+import util;
+import cluster_null as null;
+
+#from utils import seq as sequtils;
+#from utils import cluster;
+#from utils import util;
+#from utils import cluster_null as null;
+
 
 reload(sequtils);
 reload(cluster);

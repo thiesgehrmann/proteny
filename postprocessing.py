@@ -1,10 +1,14 @@
 import sys;
-sys.path.append('./utils');
+#sys.path.append('./utils');
 
 import proteny as ps;
-from utils import cluster;
-from utils import cluster_null as null;
-from utils import util;
+#from utils import cluster;
+#from utils import cluster_null as null;
+#from utils import util;
+
+import cluster;
+import cluster_null as null;
+import util;
 reload(cluster);
 reload(null);
 
