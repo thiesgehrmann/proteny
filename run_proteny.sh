@@ -48,6 +48,7 @@ ncores="${10}";
 
 ###############################################################################
 echo "STARTING IPcluster";
+export PYTHONPATH=$SCRIPTDIR:$PYTHONPATH;
 ipcluster start -n "$ncores" &
 sleep 10;
 

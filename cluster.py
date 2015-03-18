@@ -9,14 +9,14 @@ from scipy.cluster import hierarchy;
 import numpy as np;
 from ibidas import *;
 
-import cluster_null as null;
-reload(null);
+import cluster_null;
+reload(cluster_null);
 import util as util;
 reload(util);
 
 ###############################################################################
 
-def null_dist(dist=null.cluster_null_score_strict_smart, **kwargs):
+def null_dist(dist=cluster_null.cluster_null_score_strict_smart, **kwargs):
     return dist(**kwargs);
 #edef
 

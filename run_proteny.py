@@ -3,7 +3,7 @@
 import sys;
 import os;
 
-import cluster_null as null;
+import cluster_null;
 #from utils import cluster_null as null;
 
 from visualization import circos_data as cdata;
@@ -86,7 +86,7 @@ if __name__ == '__main__':
   # ANALYSIS
 
     # Run analysis
-  k = PR.analyze(id_a=id_a, id_b=id_b, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=pvalue, ngenes_threshold=2, conservation_ratio=cthresh);
+  k = PR.analyze(id_a=id_a, id_b=id_b, cut='deeper_greater', nd=cluster_null.cluster_null_score_strict_smart, alpha=pvalue, ngenes_threshold=2, conservation_ratio=cthresh);
 
     # Save! It's important!
   PR.save(savename);

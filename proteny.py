@@ -10,7 +10,7 @@ import numpy as np;
 import seq as sequtils;
 import cluster;
 import util;
-import cluster_null as null;
+import cluster_null;
 
 #from utils import seq as sequtils;
 #from utils import cluster;
@@ -21,7 +21,7 @@ import cluster_null as null;
 reload(sequtils);
 reload(cluster);
 reload(util);
-reload(null);
+reload(cluster_null);
 
 ###############################################################################
 
@@ -70,7 +70,7 @@ class proteny:
 
   ###############################################################################
 
-  def analyze(self, id_a=0, id_b=1, cut='deeper_greater', nd=null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=1):
+  def analyze(self, id_a=0, id_b=1, cut='deeper_greater', nd=cluster_null.cluster_null_score_strict_smart, alpha=0.05, ngenes_threshold=2, conservation_ratio=1):
 
       # Run BLAST
     k = self.blast(id_a=id_a, id_b=id_b);
@@ -372,7 +372,7 @@ class proteny:
 
   #############################################################################
 
-  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=null.cluster_null_score_strict_smart, ngenes_threshold=2, conservation_ratio=1):
+  def hit_cluster(self, k, alpha=0.05, cut='simple', nd=cluster_null.cluster_null_score_strict_smart, ngenes_threshold=2, conservation_ratio=1):
 
     if ((k['id_a'], k['id_b']) not in self.hits) or \
        ((k['id_a'], k['id_b']) not in self.hit_distances) or \

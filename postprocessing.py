@@ -7,10 +7,10 @@ import proteny as ps;
 #from utils import util;
 
 import cluster;
-import cluster_null as null;
+import cluster_null;
 import util;
 reload(cluster);
-reload(null);
+reload(cluster_null);
 
 import matplotlib.pyplot as plt;
 import pylab;
@@ -277,7 +277,7 @@ def cmp_clt_perm(PR, k):
   sig_clusts   = [];
   C            = [];
 
-  nd = cluster.null_dist(dist=null.cluster_null_score_strict_smart,
+  nd = cluster.null_dist(dist=cluster_null.cluster_null_score_strict_smart,
                  tests = 1,
                  scores=[ h[12] for h in hits],
                  hits=hits, hitA=hitA, hitB=hitB,
