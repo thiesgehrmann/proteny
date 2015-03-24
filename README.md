@@ -34,6 +34,16 @@ Which are then visualized in a useful way
 Installation
 =============
 
+System requirements
+-------------------
+
+Proteny has only been tested on Linux, but should work on any UNIX operating system upon which the dependencies can be installed.
+Proteny has high RAM and CPU requirements.
+If your organisms are large enough, you might require 8 cores, and at least 10GiB of memory.
+
+Dependencies
+------------
+
 Proteny depends upon a few other packages.
 (Circos is not necessary to run the program, but it is used to produce the visualizations)
 
