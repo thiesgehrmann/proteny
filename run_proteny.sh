@@ -7,7 +7,7 @@ function usage(){
   arg0="$0";
 
   echo "Run the proteny software";
-  echo "  Usage: $arg0 <name_org1> <genes_org1> <genome_org1> <name_org2> <genes_org2> <genome_org2> <p-value> <c-thresh> <outdir>";
+  echo "  Usage: $arg0 <name_org1> <genes_org1> <genome_org1> <name_org2> <genes_org2> <genome_org2> <p-value> <c-thresh> <outdir> <ncores>";
   echo "";
   echo "  Arguments:";
   echo "    <name_orgX>:   The short name for organism X";

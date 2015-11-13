@@ -1,5 +1,5 @@
 #!/bin/sh
-CIRCOS='/home/thiesgehrmann/src/circos-0.64/bin/circos'
+CIRCOS='/home/thiesgehrmann/src/circos-0.67-4/bin/circos'
 
 d=`date "+%F-%R"`;
 

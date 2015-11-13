@@ -41,9 +41,9 @@ def viz(PR, k, outdir):
 
   # Visualize relationships between chromosomes
   bchrs = ["%s_%s" % (PR.org_names[k['id_b']], str(i)) for i in PR.org_genomes[k['id_b']].Get(0)() ];
-  for i in xrange(PR.org_genomes[k['id_a']].Shape()()):
-    cc.circos_chr(files, bchrs + ["%s_%d" % (PR.org_names[k['id_a']], i+1)], ["%s_%d=0.4r" % (PR.org_names[k['id_a']], i+1)], outdir, "scaffold_%02d_%s" % (i+1, KS) );
-    print "scaffold_%02d_%s" % (i+1, KS);
+  for scaff_name in PR.org_genomes[k['id_a']].Get(0)():
+    cc.circos_chr(files, bchrs + ["%s_%s" % (PR.org_names[k['id_a']], scaff_name)], ["%s_%s=0.4r" % (PR.org_names[k['id_a']], scaff_name)], outdir, "scaffold_%s_%s" % (scaff_name, KS) );
+    print "%s_%s" % (scaff_name, KS);
   #efor
 
 #edef
@@ -57,6 +57,7 @@ if __name__ == '__main__':
     sys.exit(1);
   #fi
 
+    # Read in the argument variables
   name_org1   = sys.argv[1];
   genes_org1  = sys.argv[2];
   genome_org1 = sys.argv[3];
@@ -69,6 +70,7 @@ if __name__ == '__main__':
   cthresh = float(sys.argv[8]);
   outdir  = sys.argv[9];
 
+    # Save file (will take up quite some space)
   savename = '%s/proteny_data.proteny' % outdir;
 
     # Load the data
@@ -81,7 +83,6 @@ if __name__ == '__main__':
     # Add our organisms.
   id_a = PR.add_org(*org1, isfile=False);
   id_b = PR.add_org(*org2, isfile=False);
-  
   ###############################################################################
   # ANALYSIS
 

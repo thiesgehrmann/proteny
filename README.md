@@ -47,12 +47,13 @@ Dependencies
 Proteny depends upon a few other packages.
 (Circos is not necessary to run the program, but it is used to produce the visualizations)
 
- * Python: https://www.python.org/
- * IPython: http://ipython.org/
+ * Python: 2.7 https://www.python.org/
+ * IPython: 3.x http://ipython.org/
  * CIRCOS: http://circos.ca/
  * IBIDAS: https://github.com/mhulsman/ibidas
  * FastCluster: https://pypi.python.org/pypi/fastcluster
  * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+ * numpy: 1.9 http://www.numpy.org/
 
 
 1. Make sure that each dependency (and their dependencies) is installed.
@@ -77,7 +78,7 @@ The usage of the wrapper utility is given:
 
 ```shell
 Run the proteny software
-  Usage: ./run_proteny.sh <name_org1> <genes_org1> <genome_org1> <name_org2> <genes_org2> <genome_org2> <p-value> <c-thresh> <outdir>
+  Usage: ./run_proteny.sh <name_org1> <genes_org1> <genome_org1> <name_org2> <genes_org2> <genome_org2> <p-value> <c-thresh> <outdir> <ncores>
 
   Arguments:
     <name_orgX>:   The short name for organism X
