@@ -83,6 +83,7 @@ if __name__ == '__main__':
     # Add our organisms.
   id_a = PR.add_org(*org1, isfile=False);
   id_b = PR.add_org(*org2, isfile=False);
+  print [ x.Shape()() for x in PR.org_exons ] # Added for debugging
   ###############################################################################
   # ANALYSIS
 
