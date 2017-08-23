@@ -6,6 +6,18 @@ The method discovers clusters of hits from a bi-directional BLASTp of translated
 A dendrogram for hits is built based on genomic distances between hits, and cut based on significance of a cluster score based on a permutation test at each node in the tree.
 The result is a set of large clusters describing high exonic conservation.
 
+## Changes in current version
+The previous release of Proteny (0.05) had many problems.
+Specifically it relied on packages that were difficult to install, or were not running correctly on different platforms, or with different versions of numpy.
+
+The current release (0.1) has been completely re-implemeneted to remove these dependencies, and to facilitate cross-platform behaviour.
+Therefore, it has been implemented in Snakemake, together with the conda environment manager.
+This removes the burden on the user having to install different dependencies manually.
+
+### Missing features in the current release
+ * Permutations are not parallelized
+ * Region circos view
+
 ## Getting started
 
 ### Installation
