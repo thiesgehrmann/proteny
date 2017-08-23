@@ -1,4 +1,4 @@
-# pty
+# Proteny
 A tool to analyze synteny at the protein level. We develop an algorithm to detect statistically significant clusters of exons between two proteomes.
 The tool provides algorithms to quickly detect and visualize results in order to support conclusions from genomic data.
 
