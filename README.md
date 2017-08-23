@@ -7,10 +7,10 @@ A dendrogram for hits is built based on genomic distances between hits, and cut 
 The result is a set of large clusters describing high exonic conservation.
 
 ## Changes in current version
-The previous release of Proteny (0.05) had many problems.
+The previous release of Proteny [0.05](https://github.com/thiesgehrmann/proteny/tree/0.05) had many problems.
 Specifically it relied on packages that were difficult to install, or were not running correctly on different platforms, or with different versions of numpy.
 
-The current release (0.1) has been completely re-implemeneted to remove these dependencies, and to facilitate cross-platform behaviour.
+The current release [0.1](https://github.com/thiesgehrmann/proteny/tree/0.1) has been completely re-implemeneted to remove these dependencies, and to facilitate cross-platform behaviour.
 Therefore, it has been implemented in Snakemake, together with the conda environment manager.
 This removes the burden on the user having to install different dependencies manually.
 
