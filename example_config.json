@@ -1,0 +1,21 @@
+{
+
+  "outdir": "exampleOutput",
+
+  "genomes" : {
+    "genome_1" : {
+      "name"   : "Candida_glabrata",
+      "genome" : "example_data/Cglabrata.genome.fasta",
+      "gff"    : "example_data/Cglabrata.genes.gff3"
+    },
+
+    "genome_2" : {
+      "name"   : "Zygosaccharomyces_rouxii",
+      "genome" : "example_data/Zrouxii.genome.fasta",
+      "gff"    : "example_data/Zrouxii.genes.gff3"
+    }
+  },
+
+  "cons_thresh" : 0.5
+
+}

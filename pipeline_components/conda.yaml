@@ -1,0 +1,14 @@
+channels:
+ - bioconda
+ - thiesgehrmann
+
+dependencies:
+ - gffread
+ - blast
+ - diamond
+ - intervaltree
+ - fastcluster
+ - scipy
+ - numpy
+ - circos
+ - perl-gd
