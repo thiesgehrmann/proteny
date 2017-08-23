@@ -16,6 +16,7 @@ This removes the burden on the user having to install different dependencies man
 
 ### Missing features in the current release
  * Permutations are not parallelized
+ * Chromosome specific colors for each link in chromosome circos view
  * Region circos view
 
 ## Getting started
