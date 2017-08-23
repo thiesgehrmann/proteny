@@ -1,5 +1,10 @@
 # pty
-An ongoing re-implementation of proteny, because the old one sucks!
+A tool to analyze synteny at the protein level. We develop an algorithm to detect statistically significant clusters of exons between two proteomes.
+The tool provides algorithms to quickly detect and visualize results in order to support conclusions from genomic data.
+
+The method discovers clusters of hits from a bi-directional BLASTp of translated exon sequences in two organisms.
+A dendrogram for hits is built based on genomic distances between hits, and cut based on significance of a cluster score based on a permutation test at each node in the tree.
+The result is a set of large clusters describing high exonic conservation.
 
 ## Getting started
 
@@ -23,7 +28,7 @@ Provided is a small example using the genomes of
 To download and run the example dataset, run the following on your command line:
 
 ```bash
-  git clone https://github.com/thiesgehrmann/pty.git
+  git clone https://github.com/thiesgehrmann/proteny.git
   cd pty
   snakemake --use-conda --cores 10 --configfile example_config.json circos
 ```
