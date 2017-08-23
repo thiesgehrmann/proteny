@@ -89,9 +89,3 @@ Te configuration is very straightforward, and it is described in JSON format (se
 Proteny identifies statistically significantly conserved clusters, and outputs information about these clusters in: **outdir/run/proteny/proteny.sigClusts.tsv**
 
 In addition to this, proteny produces circos visualizations for the discovered clusters, placing them in: **outdir/run/circos**
-
-## TO DO
-
- * Paralellize permutation step
- * Different colors for links in the circos plot
- * Region vizualization in circos plots
