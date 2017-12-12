@@ -25,6 +25,7 @@ function usage() {
   echo ""
 }
 
+###############################################################################
 
 function programExists() {
   local progName="$1"
@@ -42,7 +43,7 @@ function programExists() {
 
 ###############################################################################
 
-while getopts ":a:s:t:Avh" opt; do
+while getopts ":a:s:t:vh" opt; do
   case $opt in
     s)
       sm_params="$OPTARG"

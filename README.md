@@ -92,7 +92,5 @@ In addition to this, proteny produces circos visualizations for the discovered c
 
 ## FAQ
 
-#### What if I have a lot of small scaffolds in my genome file?
-As Proteny performs a pairwise analysis between each sequence, it does not handle such a computational explosion very well.
-If you remove the smaller scaffolds from your assembly, You should also remove references to these scaffolds in your GFF file.
+Please check our list of [Frequently Asked Questions](doc/faq.md)
  
