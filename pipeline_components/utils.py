@@ -25,6 +25,8 @@ def loadFasta(fastaFile):
   F = {'': 0}
 
   current_seq = ""
+  buffer_seq  = ""
+  
   with (gzip.open(fastaFile, "r") if fastaFile[-2:] == "gz" else open(fastaFile, "r")) as fd:
     for line in fd:
       line = line.strip()
@@ -32,12 +34,14 @@ def loadFasta(fastaFile):
         continue
       #fi
       if line[0] == '>':
+        F[current_seq] = buffer_seq
         current_seq = line[1:].split(' ')[0]
-        F[current_seq] = ""
+        buffer_seq = ""
       else:
-        F[current_seq] = F[current_seq] + line.strip()
+        buffer_seq = buffer_seq + line.strip()
       #fi
   #ewith
+  F[current_seq] = buffer_seq
   F.pop("", None)
   return F
 #edef

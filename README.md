@@ -42,8 +42,8 @@ To download and run the example dataset, run the following on your command line:
 
 ```bash
   git clone https://github.com/thiesgehrmann/proteny.git
-  cd pty
-  snakemake --use-conda --cores 10 --configfile example_config.json circos
+  cd proteny
+  ./proteny -t 10 example_config.json
 ```
 
 ### Example output
@@ -89,3 +89,10 @@ Te configuration is very straightforward, and it is described in JSON format (se
 Proteny identifies statistically significantly conserved clusters, and outputs information about these clusters in: **outdir/run/proteny/proteny.sigClusts.tsv**
 
 In addition to this, proteny produces circos visualizations for the discovered clusters, placing them in: **outdir/run/circos**
+
+## FAQ
+
+#### What if I have a lot of small scaffolds in my genome file?
+As Proteny performs a pairwise analysis between each sequence, it does not handle such a computational explosion very well.
+If you remove the smaller scaffolds from your assembly, You should also remove references to these scaffolds in your GFF file.
+ 

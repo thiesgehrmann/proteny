@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+action="circos"
+sm_params=""
+validate=0
+sm_file="$SCRIPTDIR/Snakefile"
+threads=1
+
+###############################################################################
+
+function usage() {
+
+  echo "Proteny: Discovery statistically significant syntenic clusters between distant species"
+  echo ""
+  echo " proteny [options] <configfile.json>"
+  echo ""
+  echo "Options:"
+  echo " -a <action>: Action to perform (generateMarkers|quantifyTargets|deseq). Default $action"
+  echo " -s <str>: Additional arguments to snakemake"
+  echo " -t <int>: Number of cores to use. Default $threads"
+  echo " -v: Only validate input, don't run pipeline"
+  echo " -h: Print this help screen"
+  echo ""
+}
+
+
+function programExists() {
+  local progName="$1"
+
+  which "$progName" &>/dev/null
+
+  if [ ! $? -eq 0 ]; then
+    echo 1
+  else
+    echo 0
+  fi
+
+}
+
+
+###############################################################################
+
+while getopts ":a:s:t:Avh" opt; do
+  case $opt in
+    s)
+      sm_params="$OPTARG"
+      ;;
+    a)
+      action="$OPTARG"
+      ;;
+    v)
+      validate=1
+      ;;
+    t)
+     threads="$OPTARG"
+     ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      echo "Invalid option: $OPTARG" >&2
+      usage
+      exit 1
+      ;;
+    :)
+      echo "Missing argument for option $OPTARG"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+for i in `seq $((OPTIND-1))`; do
+  shift
+done
+configfile=$1
+
+if [ ! -e "$configfile" ]; then
+  echo "Error: configFile missing"
+  usage
+  exit 1
+fi
+
+$SCRIPTDIR/pipeline_components/checkInput.py "$configfile" "$action"
+checkres=$?
+if [ ! $checkres -eq 0 ]; then
+  exit $checkres
+fi
+
+#Check for snakemake and conda
+if [ ! `programExists snakemake` -eq 0 ]; then
+  echo "Error: snakemake not found in path."
+  exit 1
+fi
+
+if [ ! `programExists conda` -eq 0 ]; then
+  echo "Error: conda not found in path."
+  exit 1
+fi
+
+###############################################################################
+
+if [ $validate -eq 0 ]; then
+  snakemake --snakefile "$sm_file" --cores "$threads" --use-conda --conda-prefix "$SCRIPTDIR/.snakemake/conda" --configfile "$configfile" $sm_params $action
+fi
