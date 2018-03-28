@@ -14,7 +14,8 @@ gff3Entry = namedtuple("gff3Entry", "seqid, source, type, start, end, score, str
 def parseGFF3entry(fields):
 
    (seqid, source, feature, start, end, score, strand, phase, attr) = fields
-   attr = dict([tuple(x.strip().split('=')[0:2]) for x in attr.split(";") ])
+   attr = [ x.strip().split('=') for x in attr.split(";") ]
+   attr = dict([ (a[0], a[1]) if len(a) > 1 else (a[0], None) for a in attr ])
    return gff3Entry(seqid, source, feature, int(start), int(end), score, strand, phase, attr)
 #edef
 
